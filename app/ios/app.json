@@ -8,7 +8,7 @@
     "scheme": "altovix",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "backgroundColor": "#0D213D",
+    "backgroundColor": "#050506",
     "ios": {
       "bundleIdentifier": "com.altovixcapital.app",
       "buildNumber": "1",
@@ -22,14 +22,14 @@
     },
     "android": {
       "package": "com.altovixcapital.app",
-      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#0D213D" }
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#050506" }
     },
     "plugins": [
       ["expo-splash-screen", {
         "image": "./assets/splash-icon.png",
         "imageWidth": 220,
         "resizeMode": "contain",
-        "backgroundColor": "#0D213D"
+        "backgroundColor": "#050506"
       }]
     ],
     "extra": {

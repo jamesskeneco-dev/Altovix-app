@@ -1,6 +1,6 @@
 // Altovix service worker: keeps the app shell available offline and picks up new
 // versions in the background (a new build shows on the next launch).
-const CACHE = "altovix-shell-v1";
+const CACHE = "altovix-shell-v2";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 

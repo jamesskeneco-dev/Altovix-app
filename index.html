@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F1D33">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0C0D0F">
 <meta name="description" content="Altovix Capital — the committee, the claims, the book.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -347,24 +347,128 @@ dialog.sheet .about{padding:12px 16px 14px; font-size:11.5px; color:var(--muted)
   --line:#22344E; --line-strong:#32476A;
   --accent:#8FB4E6; --accent-ink:#081324; --accent-soft:#1A2E4C; --accent-line:#3C5A85;
 }
+
+/* ---------- Desk: black & silver ---------- */
+:root{
+  --ground:#F4F4F5; --surface:#FFFFFF; --surface-2:#ECEDEF; --raised:#F8F8F9;
+  --ink:#121316; --ink-2:#3A3D42; --muted:#6B7078; --faint:#8D9198;
+  --line:#DCDEE2; --line-strong:#C4C7CD;
+  --accent:#2A2E34; --accent-ink:#FFFFFF; --accent-soft:#E6E8EB; --accent-line:#A8ADB5;
+  --r:0; --r-sm:0;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#050506; --surface:#0C0D0F; --surface-2:#141518; --raised:#101114;
+    --ink:#D9DCE1; --ink-2:#B3B8BF; --muted:#7F858D; --faint:#5A6068;
+    --line:#202328; --line-strong:#2E3238;
+    --accent:#C9CED6; --accent-ink:#0A0A0B; --accent-soft:#1C1F24; --accent-line:#3A3F47;
+    --gold:#D3A44B; --gold-soft:#2A2314; --pos:#5FBF8F; --pos-soft:#112A1E; --neg:#E07B6D; --neg-soft:#301A16;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#050506; --surface:#0C0D0F; --surface-2:#141518; --raised:#101114;
+  --ink:#D9DCE1; --ink-2:#B3B8BF; --muted:#7F858D; --faint:#5A6068;
+  --line:#202328; --line-strong:#2E3238;
+  --accent:#C9CED6; --accent-ink:#0A0A0B; --accent-soft:#1C1F24; --accent-line:#3A3F47;
+  --gold:#D3A44B; --gold-soft:#2A2314; --pos:#5FBF8F; --pos-soft:#112A1E; --neg:#E07B6D; --neg-soft:#301A16;
+  --shadow:none;
+}
+.pill,.themebtn,.install button,.confbar,.tab .count{border-radius:2px}
+.panel{box-shadow:none}
+
+/* tape */
+.masthead{border-bottom:1px solid var(--line-strong)}
+.masthead-in{max-width:none; padding:0; gap:0}
+.tape{display:flex; align-items:center; gap:14px; height:44px; padding:0 14px; border-bottom:1px solid var(--line)}
+.tape .brand{font-family:var(--f-mono); font-size:12px; font-weight:600; letter-spacing:.14em; gap:8px; flex:none}
+.tape .brand .mark{width:20px; height:19px}
+.tape .brand small{display:none}
+.cmd{display:flex; align-items:center; gap:8px; width:300px; height:28px; padding:0 10px; border:1px solid var(--line-strong);
+  background:var(--ground); color:var(--faint); flex:none}
+.cmd svg{width:14px; height:14px; flex:none}
+.cmd input{border:none; background:none; padding:0; font-family:var(--f-mono); font-size:12px; color:var(--ink); width:100%; outline:none; min-width:0}
+.cmd input::placeholder{color:var(--faint)}
+.strip{flex:1 1 auto; display:flex; gap:22px; background:none; border:none; border-radius:0; overflow:hidden; min-width:0; flex-wrap:nowrap}
+.stat,.strip .stat{background:none; padding:0; flex:none; display:flex; gap:7px; align-items:baseline; font-family:var(--f-mono); font-size:11.5px; white-space:nowrap; min-width:0}
+.stat .k{font-size:10.5px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+.stat .v,.strip .stat .v{font-size:11.5px; font-weight:500; letter-spacing:0; margin:0}
+.stat .s{display:none}
+.stat.desk-only{display:flex}
+.tape-date{font-family:var(--f-mono); font-size:11.5px; color:var(--faint); white-space:nowrap; margin-left:auto; flex:none}
+.brandbtns{flex:none}
+.tabs{margin:0; padding:0 8px; gap:0}
+.tab{font-family:var(--f-mono); font-size:11.5px; font-weight:600; letter-spacing:.12em; padding:9px 12px 8px; color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+
+/* desk */
+.wrap{max-width:1600px; padding:0 8px 72px}
+#p-desk .regime{margin:6px 0 0; padding:8px 12px; border:1px solid var(--line); background:var(--surface)}
+#p-desk .regime p{font-size:12.5px}
+#p-desk .install{margin-top:6px}
+.desk{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:6px}
+.dpanel{background:var(--surface); border:1px solid var(--line); display:flex; flex-direction:column; min-width:0}
+.dpanel>header{display:flex; align-items:baseline; gap:10px; padding:7px 10px; border-bottom:1px solid var(--line)}
+.dpanel>header .code{font-family:var(--f-mono); font-size:11px; font-weight:600; color:var(--accent)}
+.dpanel>header .ttl{font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2)}
+.dpanel>header .meta{margin-left:auto; font-family:var(--f-mono); font-size:10.5px; color:var(--faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.dpanel>header .btn{margin-left:8px}
+.dpanel>.dbody{max-height:46vh; overflow:auto}
+.dsub{padding:5px 10px; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); border-bottom:1px solid var(--line); background:var(--raised)}
+.dpanel .todo{padding:7px 10px} .dpanel .todo .t b{font-size:13px} .dpanel .todo .t .sub{font-size:11.5px} .dpanel .todo input{width:16px; height:16px}
+.dpanel .watch{padding:7px 10px; font-size:12px} .dpanel .watch b{font-size:12px}
+.dpanel .evt{padding:7px 10px; grid-template-columns:52px 1fr; font-size:12.5px} .dpanel .evt .d b{font-size:13px} .dpanel .evt .d{font-size:11px}
+.dpanel .empty{padding:14px 10px; font-size:12.5px} .dpanel .empty strong{font-size:13px}
+.dtable{width:100%; border-collapse:collapse; font-family:var(--f-mono); font-size:12px; line-height:1.35}
+.dtable th{padding:6px 10px; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--faint); border-bottom:1px solid var(--line); text-align:right; font-weight:700; white-space:nowrap}
+.dtable th:first-child,.dtable td:first-child{text-align:left}
+.dtable td{padding:5px 10px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap; font-family:var(--f-mono); font-size:12px; font-variant-numeric:tabular-nums}
+.dtable td:first-child{font-family:var(--f-ui); font-weight:600; font-size:12.5px}
+.dtable tr:last-child td{border-bottom:none}
+.dtable tr[data-run]{cursor:pointer} .dtable tr[data-run]:hover td{background:var(--raised)}
+.dnote{padding:7px 10px; font-family:var(--f-mono); font-size:11px; color:var(--gold); border-top:1px solid var(--line)}
+footer#foot{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.04em; color:var(--faint); max-width:none; margin:0; padding:8px 14px;
+  border-top:1px solid var(--line-strong); background:var(--surface); text-transform:uppercase; line-height:1.5}
+.themebtn.icon svg{width:14px; height:14px}
+@media (max-width:720px){
+  .masthead{padding-top:0}
+  .cmd{display:none}
+  .themebtn.icon .lbl{display:none}
+  .themebtn.icon{padding:6px 8px}
+  .brandbtns{gap:4px}
+  .tape-date{font-size:11px}
+  #p-desk .regime{flex-direction:column; gap:5px; padding:8px 10px}
+  #p-desk .regime p{font-size:12px; line-height:1.45}
+  .tape{height:auto; flex-wrap:wrap; padding:calc(8px + env(safe-area-inset-top)) 12px 8px; gap:8px 12px}
+  .tape-date{margin-left:auto}
+  .strip{order:4; flex:1 1 100%; gap:14px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px}
+  .desk{grid-template-columns:1fr}
+  .dpanel>.dbody{max-height:none}
+  .dk{display:none}
+  .tab{font-size:10px; letter-spacing:.1em; padding:6px 2px 4px}
+  footer#foot{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+}
 </style>
 </head>
 <body>
 
 <header class="masthead">
   <div class="masthead-in">
-    <div class="brandrow">
-      <h1 class="brand"><span class="mark" aria-hidden="true"></span>Altovix <small>Capital</small></h1>
-      <div class="brandbtns"><button class="themebtn icon" id="settingsbtn" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button><button class="themebtn" id="themebtn" type="button">Theme</button></div>
+    <div class="tape">
+      <h1 class="brand"><span class="mark" aria-hidden="true"></span>ALTOVIX <small>Capital</small></h1>
+      <label class="cmd"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="cmd" placeholder="Ticker or command — HII, RUN NVDA, GR" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Command"></label>
+      <div class="strip" id="strip">
+        <div class="stat"><div class="k">Book</div><div class="v" id="s-total">—</div><div class="s" id="s-total-sub">no book yet</div></div>
+        <div class="stat"><div class="k">Cash</div><div class="v" id="s-cash">—</div><div class="s" id="s-cash-sub">—</div></div>
+        <div class="stat desk-only"><div class="k">Unreal</div><div class="v" id="s-unreal">—</div><div class="s" id="s-unreal-sub">on open lots</div></div>
+        <div class="stat desk-only"><div class="k">Runs</div><div class="v" id="s-runs">0</div><div class="s" id="s-runs-sub">none yet</div></div>
+        <div class="stat"><div class="k">Claims</div><div class="v" id="s-claims">0</div><div class="s" id="s-claims-sub">none due</div></div>
+        <div class="stat"><div class="k">Grade</div><div class="v" id="s-grade">—</div><div class="s"></div></div>
+      </div>
+      <div class="tape-date" id="today-date"></div>
+      <div class="brandbtns"><button class="themebtn icon" id="settingsbtn" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="lbl">Settings</span></button><button class="themebtn icon" id="themebtn" type="button" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg><span class="lbl">Theme</span></button></div>
     </div>
-    <div class="strip" id="strip">
-      <div class="stat"><div class="k">Total value</div><div class="v" id="s-total">—</div><div class="s" id="s-total-sub">no book yet</div></div>
-      <div class="stat"><div class="k">Cash</div><div class="v" id="s-cash">—</div><div class="s" id="s-cash-sub">—</div></div>
-      <div class="stat desk-only"><div class="k">Unrealised</div><div class="v" id="s-unreal">—</div><div class="s" id="s-unreal-sub">on open lots</div></div>
-      <div class="stat desk-only"><div class="k">Committee runs</div><div class="v" id="s-runs">0</div><div class="s" id="s-runs-sub">none yet</div></div>
-      <div class="stat"><div class="k">Claims open</div><div class="v" id="s-claims">0</div><div class="s" id="s-claims-sub">none due</div></div>
-    </div>
-    <nav class="tabs" role="tablist" aria-label="Terminal sections"><button class="tab" role="tab" aria-selected="true" data-tab="today"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="17" r="3"/></svg>Today</button><button class="tab" role="tab" aria-selected="false" data-tab="lists"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>Lists</button><button class="tab desk-only" role="tab" aria-selected="false" data-tab="dash">Dashboard</button><button class="tab" role="tab" aria-selected="false" data-tab="committee"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M12 10v4M8 15l2-1M16 15l-2-1"/></svg>Committee</button><button class="tab" role="tab" aria-selected="false" data-tab="calibration"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16M6 16V9M11 16V5M16 16v-7"/></svg>Grade <span class="dot hide" id="cal-dot"></span></button><button class="tab" role="tab" aria-selected="false" data-tab="book"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z"/><path d="M5 4v16"/></svg>Book <span class="count" id="tab-trades">0</span></button><button class="tab desk-only" role="tab" aria-selected="false" data-tab="method">Method</button></nav>
+    <nav class="tabs" role="tablist" aria-label="Terminal sections"><button class="tab" role="tab" aria-selected="true" data-tab="desk"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>DESK</button><button class="tab" role="tab" aria-selected="false" data-tab="lists"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>LISTS</button><button class="tab" role="tab" aria-selected="false" data-tab="committee"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M12 10v4M8 15l2-1M16 15l-2-1"/></svg>CM</button><button class="tab" role="tab" aria-selected="false" data-tab="calibration"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16M6 16V9M11 16V5M16 16v-7"/></svg>GR <span class="dot hide" id="cal-dot"></span></button><button class="tab" role="tab" aria-selected="false" data-tab="book"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z"/><path d="M5 4v16"/></svg>BK <span class="count" id="tab-trades">0</span></button><button class="tab desk-only" role="tab" aria-selected="false" data-tab="method">METHOD</button></nav>
   </div>
 </header>
 
@@ -373,25 +477,26 @@ dialog.sheet .about{padding:12px 16px 14px; font-size:11.5px; color:var(--muted)
 
 
   <!-- ================= TODAY ================= -->
-  <section id="p-today" role="tabpanel">
-    <div class="today-hd"><h2 id="today-title">Today</h2><span class="date" id="today-date"></span></div>
+  <section id="p-desk" role="tabpanel">
     <div id="today-regime"></div>
     <div id="install-hint"></div>
-
-    <div class="panel">
-      <div class="panel-hd"><div><h2>Do now</h2><p>Tranches whose date has arrived. Tick them as you fill them; ticks stay on this device.</p></div></div>
-      <div class="panel-bd flush" id="today-do"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-hd"><div><h2>Watching</h2><p>Conditional entries, re-entry levels and stops — the numbers to check against the close.</p></div></div>
-      <div class="panel-bd flush" id="today-watch"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-hd"><div><h2>Coming up</h2><p>Dated events, reviews and the calibration day, next 30 days.</p></div>
-        <button class="btn ghost sm" type="button" data-go="calibration" id="today-grade-btn" hidden>Grade due claims</button></div>
-      <div class="panel-bd flush" id="today-events"></div>
+    <div class="desk">
+      <section class="dpanel">
+        <header><span class="code">RL</span><span class="ttl">Rules</span><span class="meta" id="rl-meta"></span></header>
+        <div class="dbody"><div class="dsub">Do now</div><div id="today-do"></div><div class="dsub">Watching — checked against the close</div><div id="today-watch"></div></div>
+      </section>
+      <section class="dpanel">
+        <header><span class="code">BK</span><span class="ttl">Book</span><span class="meta" id="bk-meta"></span></header>
+        <div class="dbody"><div id="desk-book"></div></div>
+      </section>
+      <section class="dpanel">
+        <header><span class="code">CL</span><span class="ttl">Calendar</span><span class="meta" id="cl-meta"></span><button class="btn ghost sm" type="button" data-go="calibration" id="today-grade-btn" hidden>Grade due claims</button></header>
+        <div class="dbody"><div id="today-events"></div></div>
+      </section>
+      <section class="dpanel">
+        <header><span class="code">CM</span><span class="ttl">Committee</span><span class="meta" id="cm-meta"></span></header>
+        <div class="dbody"><div id="desk-runs"></div><div class="dnote" id="desk-score"></div></div>
+      </section>
     </div>
   </section>
 
@@ -1005,7 +1110,7 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
 
   /* ============================ model: bring your own key ============================ */
 
-  var APP_VERSION = "1.0.1 · 2026-09-04";
+  var APP_VERSION = "1.1.0 · 2026-09-04";
   var SETTINGS_KEY = "altovix.settings";
   var KNOWN_MODELS = ["claude-sonnet-5", "claude-opus-5", "claude-fable-5-1", "claude-haiku-4-5-20251001"];
   var PRICES = { "claude-sonnet-5": [2, 10], "claude-opus-5": [5, 25], "claude-fable-5-1": [10, 50], "claude-haiku-4-5-20251001": [1, 5] };
@@ -1711,7 +1816,7 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
     var dismissed = false;
     try { dismissed = localStorage.getItem("altovix.install") === "1"; } catch (e) {}
     $("install-hint").innerHTML = (isIOS || isAndroid) && !standalone && !dismissed && !isApp
-      ? '<div class="install"><div><b>Put Altovix on your home screen</b>' +
+      ? '<div class="install"><div><b>Put Altovix on your Home Screen</b>' +
           (isIOS ? "In Safari: tap the Share button, then <i>Add to Home Screen</i>. You get the Altovix icon, and it opens full-screen like an app."
                  : "In Chrome: tap the ⋮ menu, then <i>Add to Home screen</i>. It opens like an app.") +
         '</div><button type="button" id="install-dismiss">Got it</button></div>'
@@ -1730,7 +1835,7 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
     dos.sort(function (a, b) { return (b.tr.pct || 0) - (a.tr.pct || 0); });
     $("today-do").innerHTML = dos.length
       ? dos.map(function (d) {
-          var checked = !!state.done[d.key];
+          var checked = !!state.done[d.key] || filledFromBook(d.item.symbol, d.tr.date);
           return '<label class="todo' + (checked ? " done" : "") + '"><input type="checkbox" data-done="' + esc(d.key) + '"' + (checked ? " checked" : "") + '>' +
             '<span class="t"><b>' + esc(d.item.action) + " " + esc(d.item.symbol) + '</b> <span class="mut">· ' + esc(d.plan.shortName || d.plan.name) + '</span>' +
             '<div class="sub">' + esc(d.tr.label || "") + (d.tr.condition ? " — " + esc(d.tr.condition) : "") +
@@ -1810,13 +1915,107 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
   }
 
   function renderAll() {
-    renderToday(); renderLists(); renderDash(); renderCommitteeList(); renderCalibration(); renderBook();
+    renderToday(); renderLists(); renderDash(); renderCommitteeList(); renderCalibration(); renderBook(); renderDesk();
   }
+  /* ============================ desk ============================ */
+
+  function planItemFor(sym) {
+    for (var i = 0; i < state.plans.length; i++) {
+      var its = state.plans[i].items || [];
+      for (var j = 0; j < its.length; j++) if (its[j].symbol === sym) return { plan: state.plans[i], item: its[j] };
+    }
+    return null;
+  }
+  function parseLevel(text) {
+    var s = String(text || ""), m = /\$\s*(\d[\d,]*(?:\.\d+)?)/.exec(s);
+    if (!m) m = /(?:^|[^\d.%])(\d[\d,]*(?:\.\d+)?)(?![\d,.]*\s*%)/.exec(s);
+    return m ? Number(m[1].replace(/,/g, "")) : null;
+  }
+  function filledFromBook(sym, since) {
+    return state.trades.some(function (t) { return t.side === "BUY" && t.symbol === sym && t.date >= since; });
+  }
+  function renderDesk() {
+    var p = positions(), now = today();
+    var d = new Date(now + "T00:00:00Z");
+    $("today-date").textContent = ["SUN","MON","TUE","WED","THU","FRI","SAT"][d.getUTCDay()] + " " +
+      String(d.getUTCDate()).padStart(2, "0") + " " + MONTHS[d.getUTCMonth()].toUpperCase() + " " + d.getUTCFullYear();
+
+    // BK — positions with the plan's stop and the distance to it
+    $("desk-book").innerHTML = p.list.length
+      ? "<table class='dtable'><thead><tr><th>Sym</th><th class='dk'>Qty</th><th class='dk'>Avg</th><th>Mark</th><th>P&amp;L</th><th class='dk'>Stop</th><th>To stop</th><th class='dk'>Wt</th></tr></thead><tbody>" +
+        p.list.slice().sort(function (a, b) { return b.weight - a.weight; }).map(function (x) {
+          var pi = planItemFor(x.symbol), stop = pi && pi.item.action !== "AVOID" ? parseLevel(pi.item.stop) : null;
+          var dist = stop != null && x.mark ? stop / x.mark - 1 : null;
+          return "<tr><td>" + esc(x.symbol) + "</td><td class='dk'>" + (Math.round(x.shares * 1e4) / 1e4) + "</td><td class='dk'>" + money(x.avg) + "</td>" +
+            "<td class='" + (x.mark == null ? "mut" : "") + "'>" + (x.mark == null ? "—" : money(x.mark)) + "</td>" +
+            "<td class='" + sign(x.pnl) + "'>" + (x.pnlPct == null ? "—" : pctS(x.pnlPct, 2)) + "</td>" +
+            "<td class='dk " + (stop == null ? "mut" : "") + "'>" + (stop == null ? "—" : money(stop)) + "</td>" +
+            "<td class='" + (dist == null ? "mut" : dist > -0.03 ? "neg" : "mut") + "'>" + (dist == null ? "—" : pctS(dist, 1)) + "</td>" +
+            "<td class='dk'>" + pctM(x.weight, 1) + "</td></tr>";
+        }).join("") + "</tbody></table>"
+      : '<div class="empty"><strong>No positions</strong>Record a deposit and your fills under BK.</div>';
+    $("bk-meta").textContent = p.list.length
+      ? p.list.length + " positions · " + money(p.invested) + " deployed · " + pctM(p.cash / p.total, 1) + " cash"
+      : (state.trades.length ? "cash only" : "no book yet");
+
+    // CM — recent decisions, click for the transcript
+    var listOf = function (sym) {
+      var pi = planItemFor(sym); return pi ? (pi.plan.shortName || pi.plan.name) : "—";
+    };
+    var runs = state.runs.slice(0, 9);
+    $("desk-runs").innerHTML = runs.length
+      ? "<table class='dtable'><thead><tr><th>Sym</th><th style='text-align:left'>Action</th><th>Size</th><th>Conf</th><th class='dk'>Claims</th><th class='dk' style='text-align:left'>List</th></tr></thead><tbody>" +
+        runs.map(function (r) {
+          var a = r.action || r.status || "—", cls = /BUY/.test(a) ? "pos" : /AVOID|SELL|TRIM/.test(a) ? "neg" : "mut";
+          return "<tr data-run='" + esc(r.id) + "'><td>" + esc(r.symbol) + "</td><td style='text-align:left' class='" + cls + "'>" + esc(a) + "</td>" +
+            "<td>" + (r.sizePct ? r.sizePct + "%" : "—") + "</td><td>" + (r.confidence == null ? "—" : pctM(r.confidence)) + "</td>" +
+            "<td class='dk'>" + (r.claimCount || 0) + "</td><td class='dk mut' style='text-align:left'>" + esc(listOf(r.symbol)) + "</td></tr>";
+        }).join("") + "</tbody></table>"
+      : '<div class="empty"><strong>No runs yet</strong>Convene the committee under CM.</div>';
+    var open = state.claims.filter(function (c) { return c.status === "OPEN"; });
+    var graded = state.claims.length - open.length;
+    var due = open.filter(function (c) { return c.dueOn <= now; }).length;
+    var next = null, nextN = 0;
+    open.forEach(function (c) { if (c.dueOn > now && (!next || c.dueOn < next)) next = c.dueOn; });
+    open.forEach(function (c) { if (c.dueOn === next) nextN++; });
+    var f = next ? fmtDate(next) : null;
+    $("desk-score").textContent = due
+      ? due + " claims are due for grading — open GR."
+      : graded
+        ? graded + " claims graded — scorecard under GR." + (next ? " Next: " + f.day + " " + f.mon + " (" + nextN + ")." : "")
+        : "No graded claims yet" + (next ? " — first grading " + f.day + " " + f.mon + " (" + nextN + ")." : ".");
+    $("cm-meta").textContent = state.runs.length + " runs · " + state.claims.length + " claims";
+    $("s-grade").textContent = due ? due + " DUE" : (next ? (f.mon + " " + f.day).toUpperCase() + " · " + nextN : "—");
+    $("s-grade").className = "v " + (due ? "neg" : "");
+
+    // RL / CL metas from what renderToday drew
+    var boxes = document.querySelectorAll("#today-do [data-done]"), left = 0;
+    Array.prototype.forEach.call(boxes, function (b) { if (!b.checked) left++; });
+    var watching = document.querySelectorAll("#today-watch .watch").length;
+    $("rl-meta").textContent = (boxes.length ? left + " of " + boxes.length + " to do" : "nothing due") + " · " + watching + " watching";
+    var first = document.querySelector("#today-events .evt .d b");
+    $("cl-meta").textContent = first ? "next: " + first.textContent : "";
+  }
+
+  // command box: a ticker opens the committee on it; codes open pages
+  $("cmd").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    var raw = $("cmd").value.trim().toUpperCase(), parts = raw.split(/\s+/), head = parts[0] || "";
+    var codes = { DESK: "desk", HOME: "desk", LISTS: "lists", LS: "lists", CM: "committee", RUN: "committee", GR: "calibration", GRADE: "calibration", BK: "book", BOOK: "book", METHOD: "method", DASH: "dash", ALLOC: "dash" };
+    if (codes[head]) {
+      switchTab(codes[head]);
+      if ((head === "RUN" || head === "CM") && parts[1]) { $("c-symbol").value = parts[1]; $("c-context").focus(); }
+    } else if (/^[A-Z.]{1,6}$/.test(head)) {
+      switchTab("committee"); $("c-symbol").value = head; $("c-context").focus();
+    }
+    $("cmd").value = "";
+  });
+
 
   /* ============================ events ============================ */
 
   function switchTab(name) {
-    ["today", "lists", "dash", "committee", "calibration", "book", "method"].forEach(function (t) {
+    ["desk", "lists", "dash", "committee", "calibration", "book", "method"].forEach(function (t) {
       $("p-" + t).hidden = t !== name;
     });
     Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) {
