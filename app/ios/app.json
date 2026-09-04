@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Altovix",
+    "slug": "altovix",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "altovix",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "backgroundColor": "#0D213D",
+    "ios": {
+      "bundleIdentifier": "com.altovixcapital.app",
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "config": { "usesNonExemptEncryption": false },
+      "infoPlist": {
+        "CFBundleDisplayName": "Altovix",
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIViewControllerBasedStatusBarAppearance": true
+      }
+    },
+    "android": {
+      "package": "com.altovixcapital.app",
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#0D213D" }
+    },
+    "plugins": [
+      ["expo-splash-screen", {
+        "image": "./assets/splash-icon.png",
+        "imageWidth": 220,
+        "resizeMode": "contain",
+        "backgroundColor": "#0D213D"
+      }]
+    ],
+    "extra": {
+      "eas": { "projectId": "REPLACE-WITH-YOUR-EXPO-PROJECT-ID" }
+    }
+  }
+}

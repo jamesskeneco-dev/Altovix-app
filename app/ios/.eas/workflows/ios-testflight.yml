@@ -1,0 +1,24 @@
+# EAS Workflow: build the iOS app in Expo's cloud and send it to TestFlight.
+# Runs on every push to main once the repo is connected to the Expo project
+# (expo.dev → project → GitHub). Needs the App Store Connect API key stored in the
+# project's credentials so the submit step is non-interactive.
+name: iOS → TestFlight
+
+on:
+  push:
+    branches: [main]
+    paths: ["app/ios/**"]
+
+jobs:
+  build:
+    type: build
+    params:
+      platform: ios
+      profile: production
+  submit:
+    needs: [build]
+    type: submit
+    params:
+      platform: ios
+      build_id: ${{ needs.build.outputs.build_id }}
+      profile: production

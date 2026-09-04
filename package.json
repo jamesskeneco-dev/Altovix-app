@@ -1,0 +1,23 @@
+{
+  "name": "altovix",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Altovix Terminal - AI investment committee with a full audit trail and calibration scoring.",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "init": "node --experimental-strip-types src/cli/init.ts",
+    "ingest": "node --experimental-strip-types src/cli/ingest.ts",
+    "trade": "node --experimental-strip-types src/cli/trade.ts",
+    "snapshot": "node --experimental-strip-types src/cli/snapshot.ts",
+    "committee": "node --experimental-strip-types src/cli/committee.ts",
+    "calibrate": "node --experimental-strip-types src/cli/calibrate.ts",
+    "report": "node --experimental-strip-types src/cli/report.ts",
+    "build:widget": "node web/widget/build-widget.mjs web/altovix-widget.scriptable.js",
+    "test": "node --experimental-strip-types --test test/*.test.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

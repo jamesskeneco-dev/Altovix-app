@@ -1,0 +1,1694 @@
+<title>Altovix Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F1F4F2; --surface:#FFFFFF; --surface-2:#E7ECE9; --raised:#FBFCFB;
+  --ink:#121A17; --ink-2:#374440; --muted:#63736D; --faint:#8C9B95;
+  --line:#D3DCD8; --line-strong:#B9C6C1;
+  --accent:#1D5F52; --accent-ink:#FFFFFF; --accent-soft:#DDEBE6; --accent-line:#8FBFB2;
+  --gold:#8A6012; --gold-soft:#F3E7D0;
+  --pos:#1C6B4B; --pos-soft:#DCEEE4;
+  --neg:#A2382C; --neg-soft:#F6E0DC;
+  --warn:#8A5A08;
+  --shadow:0 1px 2px rgba(18,26,23,.06), 0 8px 24px -12px rgba(18,26,23,.16);
+  --r:10px; --r-sm:6px;
+  --f-display:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-ui:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1412; --surface:#151D1A; --surface-2:#1D2724; --raised:#1A2320;
+    --ink:#E5EDE9; --ink-2:#C2CFCA; --muted:#8B9A94; --faint:#6C7B76;
+    --line:#27332F; --line-strong:#36453F;
+    --accent:#4FB39B; --accent-ink:#08120F; --accent-soft:#15302A; --accent-line:#2C5A50;
+    --gold:#D3A44B; --gold-soft:#2B2415;
+    --pos:#4FB185; --pos-soft:#122C21;
+    --neg:#DE7A6C; --neg-soft:#311A16;
+    --warn:#C9962F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1412; --surface:#151D1A; --surface-2:#1D2724; --raised:#1A2320;
+  --ink:#E5EDE9; --ink-2:#C2CFCA; --muted:#8B9A94; --faint:#6C7B76;
+  --line:#27332F; --line-strong:#36453F;
+  --accent:#4FB39B; --accent-ink:#08120F; --accent-soft:#15302A; --accent-line:#2C5A50;
+  --gold:#D3A44B; --gold-soft:#2B2415;
+  --pos:#4FB185; --pos-soft:#122C21;
+  --neg:#DE7A6C; --neg-soft:#311A16;
+  --warn:#C9962F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--f-ui); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0; text-wrap:balance; font-weight:600}
+p{margin:0}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important; transition-duration:.01ms !important}}
+
+.wrap{max-width:1080px; margin:0 auto; padding:0 16px 72px}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:1px solid var(--line); background:var(--surface)}
+.masthead-in{max-width:1080px; margin:0 auto; padding:14px 16px 0;
+  display:flex; flex-direction:column; gap:14px}
+.brandrow{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.brand{font-family:var(--f-display); font-size:23px; letter-spacing:-.01em; display:flex; align-items:baseline; gap:9px}
+.brand .mark{width:9px; height:9px; background:var(--accent); border-radius:2px; transform:rotate(45deg); display:inline-block}
+.brand small{font-family:var(--f-ui); font-size:11px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted)}
+.themebtn{background:none; border:1px solid var(--line); color:var(--muted); border-radius:99px;
+  padding:5px 11px; font-size:12px; font-weight:600; cursor:pointer}
+.themebtn:hover{border-color:var(--line-strong); color:var(--ink)}
+
+.strip{display:flex; flex-wrap:wrap; gap:1px;
+  background:var(--line); border:1px solid var(--line); border-bottom:none;
+  border-radius:var(--r) var(--r) 0 0; overflow:hidden}
+.stat{background:var(--surface); padding:10px 13px 11px; flex:1 1 132px; min-width:0}
+.stat .k{font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--faint)}
+.stat .v{font-family:var(--f-mono); font-size:17px; font-weight:500; letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums; margin-top:2px}
+.stat .s{font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+
+.tabs{display:flex; gap:2px; overflow-x:auto; scrollbar-width:none; margin:0 -16px; padding:0 16px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none; border:none; border-bottom:2px solid transparent; color:var(--muted);
+  padding:11px 12px 10px; font-size:13.5px; font-weight:600; cursor:pointer; white-space:nowrap;
+  display:flex; align-items:center; gap:6px}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
+.tab .count{font-family:var(--f-mono); font-size:10.5px; background:var(--surface-2); color:var(--muted);
+  padding:1px 5px; border-radius:99px; font-weight:600}
+.tab[aria-selected="true"] .count{background:var(--accent-soft); color:var(--accent)}
+.tab .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+
+/* ---------- panels ---------- */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); margin-top:16px; overflow:hidden}
+.panel-hd{padding:14px 16px 12px; border-bottom:1px solid var(--line);
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.panel-hd h2{font-family:var(--f-display); font-size:17px; letter-spacing:-.01em}
+.panel-hd p{font-size:12.5px; color:var(--muted); margin-top:3px; max-width:62ch}
+.panel-bd{padding:16px}
+.panel-bd.flush{padding:0}
+.eyebrow{font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--faint)}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse; font-size:13.5px}
+th{font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--faint);
+  text-align:right; padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:9px 12px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap;
+  font-family:var(--f-mono); font-variant-numeric:tabular-nums; font-size:12.5px}
+td:first-child{text-align:left; font-family:var(--f-ui); font-weight:600; font-size:13.5px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--raised)}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .mut{color:var(--muted)}
+
+/* ---------- allocation bar ---------- */
+.alloc{display:flex; height:9px; border-radius:99px; overflow:hidden; background:var(--surface-2); gap:1px}
+.alloc span{display:block}
+.alloclegend{display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:11px; font-size:12px; color:var(--muted)}
+.alloclegend b{color:var(--ink); font-weight:600}
+.swatch{width:8px; height:8px; border-radius:2px; display:inline-block; margin-right:6px}
+
+/* ---------- forms ---------- */
+.field{display:flex; flex-direction:column; gap:5px}
+.field label{font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
+input,select,textarea{background:var(--raised); border:1px solid var(--line); border-radius:var(--r-sm);
+  padding:8px 10px; width:100%; font-size:14px}
+input:focus,select:focus,textarea:focus{border-color:var(--accent-line); background:var(--surface)}
+textarea{font-family:var(--f-mono); font-size:12.5px; line-height:1.55; resize:vertical; min-height:96px}
+input[type="number"],input.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.grid3{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end}
+
+.btn{background:var(--accent); color:var(--accent-ink); border:1px solid transparent; border-radius:var(--r-sm);
+  padding:9px 16px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45; cursor:not-allowed; filter:none}
+.btn.ghost{background:transparent; color:var(--ink); border-color:var(--line-strong)}
+.btn.ghost:hover{background:var(--surface-2); filter:none}
+.btn.sm{padding:6px 11px; font-size:12.5px}
+.btn.danger{background:var(--neg); color:#fff}
+
+/* ---------- pills / chips ---------- */
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:3px 8px; border-radius:99px;
+  background:var(--surface-2); color:var(--muted)}
+.pill.buy,.pill.hit{background:var(--pos-soft); color:var(--pos)}
+.pill.sell,.pill.avoid,.pill.miss{background:var(--neg-soft); color:var(--neg)}
+.pill.hold,.pill.trim{background:var(--gold-soft); color:var(--gold)}
+.pill.open{background:var(--accent-soft); color:var(--accent)}
+
+/* ---------- committee ---------- */
+.agentlist{display:flex; flex-direction:column}
+.agent{border-bottom:1px solid var(--line)}
+.agent:last-child{border-bottom:none}
+.agent-hd{display:flex; align-items:center; gap:11px; padding:11px 16px; width:100%;
+  background:none; border:none; text-align:left; cursor:pointer}
+.agent-hd:hover{background:var(--raised)}
+.agent-hd[disabled]{cursor:default}
+.seq{font-family:var(--f-mono); font-size:11px; font-weight:600; color:var(--faint);
+  width:20px; flex:none; font-variant-numeric:tabular-nums}
+.agent-name{font-weight:600; font-size:14px; flex:none}
+.agent-role{font-size:12px; color:var(--muted); flex:1; min-width:0; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap}
+.agent-state{font-family:var(--f-mono); font-size:11px; color:var(--faint); flex:none}
+.agent-bd{padding:0 16px 16px 47px; display:grid; gap:11px}
+.kv{display:grid; grid-template-columns:132px 1fr; gap:4px 14px; font-size:13px}
+.kv dt{font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--faint); padding-top:2px}
+.kv dd{margin:0; color:var(--ink-2)}
+.kv dd.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums; font-size:12.5px}
+@media (max-width:620px){.kv{grid-template-columns:1fr; gap:1px 0} .kv dd{margin-bottom:7px}}
+.spinner{width:12px; height:12px; border:2px solid var(--accent-line); border-top-color:transparent;
+  border-radius:50%; animation:spin .7s linear infinite; display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- calibration ---------- */
+.reliability{display:flex; flex-direction:column; gap:6px; margin-top:12px}
+.relrow{display:grid; grid-template-columns:58px 1fr auto; gap:11px; align-items:center;
+  font-family:var(--f-mono); font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.reltrack{position:relative; height:15px; background:var(--surface-2); border-radius:3px}
+.relfill{position:absolute; inset:0 auto 0 0; background:var(--gold); border-radius:3px 0 0 3px; opacity:.9}
+.reltick{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--accent); border-radius:2px}
+.relgap{white-space:nowrap; font-size:10px}
+.rellegend{display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-size:11px;
+  color:var(--muted); margin-top:9px}
+.note{font-size:12.5px; color:var(--muted); line-height:1.55}
+.empty{padding:26px 16px; text-align:center; color:var(--muted); font-size:13.5px}
+.empty strong{display:block; color:var(--ink); font-size:15px; font-weight:600; margin-bottom:5px}
+.banner{display:flex; gap:10px; align-items:flex-start; padding:11px 13px; border-radius:var(--r-sm);
+  font-size:12.5px; line-height:1.5; border:1px solid var(--line); background:var(--raised); color:var(--ink-2)}
+.banner.warn{background:var(--gold-soft); border-color:transparent; color:var(--gold)}
+.banner.bad{background:var(--neg-soft); border-color:transparent; color:var(--neg)}
+.hide{display:none !important}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+/* ---------- today / lists / mobile ---------- */
+.today-hd{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:16px; flex-wrap:wrap}
+.today-hd h2{font-family:var(--f-display); font-size:22px; letter-spacing:-.01em}
+.today-hd .date{font-size:12.5px; color:var(--muted)}
+.regime{display:flex; gap:12px; align-items:flex-start; padding:13px 15px; border-radius:var(--r); margin-top:12px;
+  background:var(--accent-soft); border:1px solid var(--accent-line); color:var(--ink)}
+.regime .tag{font-family:var(--f-mono); font-size:11px; font-weight:600; letter-spacing:.06em; color:var(--accent);
+  white-space:nowrap; padding-top:2px}
+.regime p{font-size:13px; line-height:1.5; color:var(--ink-2)}
+.todo{display:flex; gap:12px; align-items:flex-start; padding:12px 16px; border-bottom:1px solid var(--line)}
+.todo:last-child{border-bottom:none}
+.todo input{width:20px; height:20px; margin:2px 0 0; flex:none; accent-color:var(--accent)}
+.todo .t{flex:1; min-width:0}
+.todo .t b{font-size:14.5px}
+.todo .t .sub{font-size:12.5px; color:var(--muted); margin-top:2px; line-height:1.45}
+.todo.done .t{opacity:.5; text-decoration:line-through}
+.todo .amt{font-family:var(--f-mono); font-size:13px; font-variant-numeric:tabular-nums; flex:none; padding-top:1px}
+.evt{display:grid; grid-template-columns:58px 1fr; gap:12px; padding:11px 16px; border-bottom:1px solid var(--line); font-size:13.5px}
+.evt:last-child{border-bottom:none}
+.evt .d{font-family:var(--f-mono); font-size:12px; color:var(--muted); line-height:1.3; padding-top:2px}
+.evt .d b{display:block; font-size:15px; color:var(--ink); font-weight:600}
+.evt .l{line-height:1.45}
+.evt .l .syms{font-family:var(--f-mono); font-size:11px; color:var(--accent); margin-top:3px}
+.evt.today .d b{color:var(--accent)}
+.evt.cal .d b{color:var(--gold)}
+.watch{padding:11px 16px; border-bottom:1px solid var(--line); font-size:13px; line-height:1.5; display:grid; grid-template-columns:52px 1fr; gap:10px}
+.watch:last-child{border-bottom:none}
+.watch b{font-family:var(--f-mono); font-size:13px}
+.watch .mut{display:block}
+.cards{display:grid; gap:1px; background:var(--line)}
+.card{background:var(--surface); padding:12px 16px; display:grid; grid-template-columns:auto 1fr auto; gap:6px 12px;
+  align-items:center; cursor:pointer; width:100%; border:none; text-align:left}
+.card:hover{background:var(--raised)}
+.card .sym{font-weight:700; font-size:15px; grid-row:1; grid-column:1}
+.card .meta{grid-column:2; display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--muted)}
+.card .why{grid-column:1 / -1; font-size:13px; color:var(--ink-2); line-height:1.45}
+.card .stop{grid-column:1 / -1; font-size:12px; color:var(--muted)}
+.card .stop b{color:var(--neg); font-weight:600}
+.card .chev{color:var(--faint); font-size:18px; grid-row:1; grid-column:3; justify-self:end}
+.confbar{width:54px; height:5px; background:var(--surface-2); border-radius:99px; overflow:hidden; display:inline-block; vertical-align:middle}
+.confbar i{display:block; height:100%; background:var(--accent)}
+.list-hd{padding:14px 16px 10px; display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap}
+.list-hd h2{font-family:var(--f-display); font-size:17px}
+.list-hd .eyebrow{font-size:10.5px}
+.install{display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:var(--r); margin-top:14px;
+  background:var(--gold-soft); color:var(--gold); font-size:12.5px; line-height:1.5}
+.install b{display:block; color:var(--ink); font-size:13px; margin-bottom:2px}
+.install button{margin-left:auto; flex:none; background:none; border:1px solid currentColor; color:inherit; border-radius:99px;
+  padding:3px 9px; font-size:11px; cursor:pointer}
+.tab .ico{display:none}
+.mobile-only{display:none}
+@media (max-width:720px){
+  .wrap{padding-bottom:96px}
+  .masthead-in{padding-top:10px; gap:10px}
+  .brand{font-size:20px}
+  .strip .stat{flex-basis:100px; padding:8px 10px 9px}
+  .strip .stat .v{font-size:15px}
+  .strip .stat.desk-only{display:none}
+  .tabs{position:fixed; left:0; right:0; bottom:0; margin:0; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    background:var(--surface); border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(5,1fr); gap:0;
+    z-index:50; box-shadow:0 -6px 20px -12px rgba(0,0,0,.25)}
+  .tab{flex-direction:column; gap:3px; padding:6px 2px 4px; font-size:10.5px; border-bottom:none; border-radius:8px; justify-content:center}
+  .tab .ico{display:block; width:22px; height:22px}
+  .tab[aria-selected="true"]{background:var(--accent-soft)}
+  .tab.desk-only{display:none}
+  .tab .count{position:absolute; transform:translate(16px,-22px)}
+  .tab .dot{position:absolute; transform:translate(14px,-22px)}
+  .mobile-only{display:block}
+  .panel-hd p{max-width:none}
+  .kv{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+}
+
+footer{max-width:1080px; margin:26px auto 0; padding:0 16px 8px; font-size:11.5px; color:var(--muted); line-height:1.65; max-width:78ch}
+</style>
+
+<header class="masthead">
+  <div class="masthead-in">
+    <div class="brandrow">
+      <h1 class="brand"><span class="mark"></span>Altovix <small>Terminal</small></h1>
+      <button class="themebtn" id="themebtn" type="button">Theme</button>
+    </div>
+    <div class="strip" id="strip">
+      <div class="stat"><div class="k">Total value</div><div class="v" id="s-total">—</div><div class="s" id="s-total-sub">no book yet</div></div>
+      <div class="stat"><div class="k">Cash</div><div class="v" id="s-cash">—</div><div class="s" id="s-cash-sub">—</div></div>
+      <div class="stat desk-only"><div class="k">Unrealised</div><div class="v" id="s-unreal">—</div><div class="s" id="s-unreal-sub">on open lots</div></div>
+      <div class="stat desk-only"><div class="k">Committee runs</div><div class="v" id="s-runs">0</div><div class="s" id="s-runs-sub">none yet</div></div>
+      <div class="stat"><div class="k">Claims open</div><div class="v" id="s-claims">0</div><div class="s" id="s-claims-sub">none due</div></div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Terminal sections"><button class="tab" role="tab" aria-selected="true" data-tab="today"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="17" r="3"/></svg>Today</button><button class="tab" role="tab" aria-selected="false" data-tab="lists"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>Lists</button><button class="tab desk-only" role="tab" aria-selected="false" data-tab="dash">Dashboard</button><button class="tab" role="tab" aria-selected="false" data-tab="committee"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M12 10v4M8 15l2-1M16 15l-2-1"/></svg>Committee</button><button class="tab" role="tab" aria-selected="false" data-tab="calibration"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16M6 16V9M11 16V5M16 16v-7"/></svg>Grade <span class="dot hide" id="cal-dot"></span></button><button class="tab" role="tab" aria-selected="false" data-tab="book"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z"/><path d="M5 4v16"/></svg>Book <span class="count" id="tab-trades">0</span></button><button class="tab desk-only" role="tab" aria-selected="false" data-tab="method">Method</button></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="statusbanner"></div>
+
+
+  <!-- ================= TODAY ================= -->
+  <section id="p-today" role="tabpanel">
+    <div class="today-hd"><h2 id="today-title">Today</h2><span class="date" id="today-date"></span></div>
+    <div id="today-regime"></div>
+    <div id="install-hint"></div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Do now</h2><p>Tranches whose date has arrived. Tick them as you fill them; ticks stay on this device.</p></div></div>
+      <div class="panel-bd flush" id="today-do"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Watching</h2><p>Conditional entries, re-entry levels and stops — the numbers to check against the close.</p></div></div>
+      <div class="panel-bd flush" id="today-watch"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Coming up</h2><p>Dated events, reviews and the calibration day, next 30 days.</p></div>
+        <button class="btn ghost sm" type="button" data-go="calibration" id="today-grade-btn" hidden>Grade due claims</button></div>
+      <div class="panel-bd flush" id="today-events"></div>
+    </div>
+  </section>
+
+  <!-- ================= LISTS ================= -->
+  <section id="p-lists" role="tabpanel" hidden>
+    <div id="lists"></div>
+  </section>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section id="p-dash" role="tabpanel" hidden>
+    <div class="panel">
+      <div class="panel-hd">
+        <div><h2>Positions</h2><p>Open tax lots, aggregated by symbol. Prices are the last mark you entered — this page has no market feed, so nothing here is stale without you knowing it.</p></div>
+        <button class="btn ghost sm" type="button" id="btn-mark">Update marks</button>
+      </div>
+      <div class="panel-bd flush"><div id="positions"></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Allocation</h2><p>Weights against total equity, cash included.</p></div></div>
+      <div class="panel-bd"><div id="allocation"></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Recent decisions</h2><p>What the committee concluded, and whether the horizon has closed on it yet.</p></div></div>
+      <div class="panel-bd flush"><div id="decisions"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= COMMITTEE ================= -->
+  <section id="p-committee" role="tabpanel" hidden>
+    <div class="panel">
+      <div class="panel-hd">
+        <div><h2>Convene the committee</h2>
+        <p>Eight roles run in sequence, each seeing every report before it. Every agent states a confidence, and every falsifiable claim is recorded with a deadline so it can be graded later.</p></div>
+      </div>
+      <div class="panel-bd">
+        <div class="row" style="margin-bottom:12px">
+          <div class="field" style="flex:0 0 130px"><label for="c-symbol">Ticker</label>
+            <input id="c-symbol" class="mono" placeholder="NVDA" autocapitalize="characters" spellcheck="false"></div>
+          <div class="field" style="flex:0 0 150px"><label for="c-mandate">Mandate</label>
+            <select id="c-mandate">
+              <option value="NEW_POSITION">New position</option>
+              <option value="REVIEW">Review a holding</option>
+              <option value="EXIT">Exit decision</option>
+            </select></div>
+          <div class="field" style="flex:0 0 150px"><label for="c-depth">Depth</label>
+            <select id="c-depth">
+              <option value="full">Full — 8 agents</option>
+              <option value="quick">Quick — 4 agents</option>
+            </select></div>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label for="c-context">Market context — paste what you actually have</label>
+          <textarea id="c-context" placeholder="Price 118.40, +6.2% 21d, +19% 63d, -3% vs SPY 63d, RSI 61, 8% above 200d, vol20 0.34, VIX 17.4, SPY +2.1% 21d, credit spreads calm.
+
+Anything you can see in your broker app or from `npm run report` in the repo. Leave it blank and the committee will run anyway — it will list what it was not given and lower its confidence accordingly."></textarea>
+        </div>
+        <div class="row">
+          <button class="btn" id="btn-run" type="button">Run committee</button>
+          <button class="btn ghost" id="btn-cancel" type="button" hidden>Stop</button>
+          <span class="note" id="run-status"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="run-panel" hidden>
+      <div class="panel-hd">
+        <div><h2 id="run-title">Run</h2><p id="run-sub"></p></div>
+        <button class="btn ghost sm" type="button" id="btn-savedecision" hidden>Log the trade</button>
+      </div>
+      <div class="panel-bd flush"><div class="agentlist" id="agents"></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Past runs</h2><p>Every run is kept whole, including the ones that went badly. That is the point.</p></div></div>
+      <div class="panel-bd flush"><div id="runlist"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= CALIBRATION ================= -->
+  <section id="p-calibration" role="tabpanel" hidden>
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Claims due for grading</h2>
+        <p>A claim comes due when its horizon closes. Enter what the price actually did and it is graded mechanically — no model gets to mark its own homework on a number.</p></div></div>
+      <div class="panel-bd flush"><div id="due"></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Agent scorecard</h2>
+        <p>Hit rate is how often each agent was right. Brier skill asks a harder question: does its stated confidence carry information beyond its own base rate? Below zero means you would do better ignoring the number.</p></div></div>
+      <div class="panel-bd flush"><div id="scorecard"></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>All claims</h2><p>Open and settled, most recent first.</p></div></div>
+      <div class="panel-bd flush"><div id="claimlist"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= BOOK ================= -->
+  <section id="p-book" role="tabpanel" hidden>
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Record a trade</h2><p>Each buy opens its own tax lot. Sells consume lots FIFO and the holding period decides short or long term.</p></div></div>
+      <div class="panel-bd">
+        <div class="grid3" style="margin-bottom:12px">
+          <div class="field"><label for="t-side">Side</label>
+            <select id="t-side"><option>BUY</option><option>SELL</option><option>DEPOSIT</option><option>WITHDRAW</option></select></div>
+          <div class="field" id="f-symbol"><label for="t-symbol">Ticker</label>
+            <input id="t-symbol" class="mono" placeholder="NVDA" autocapitalize="characters" spellcheck="false"></div>
+          <div class="field" id="f-shares"><label for="t-shares">Shares</label>
+            <input id="t-shares" type="number" step="any" min="0" placeholder="10"></div>
+          <div class="field" id="f-price"><label for="t-price">Price</label>
+            <input id="t-price" type="number" step="any" min="0" placeholder="118.40"></div>
+          <div class="field" id="f-amount" hidden><label for="t-amount">Amount</label>
+            <input id="t-amount" type="number" step="any" min="0" placeholder="10000"></div>
+          <div class="field"><label for="t-date">Date</label><input id="t-date" type="date"></div>
+        </div>
+        <div class="field" style="margin-bottom:12px"><label for="t-thesis">Thesis and exit rule</label>
+          <input id="t-thesis" placeholder="Why, and the condition that closes it"></div>
+        <div class="row">
+          <button class="btn" id="btn-trade" type="button">Record</button>
+          <span class="note" id="trade-status"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Tax lots</h2><p>Every open lot with its holding period and how far it is from long-term treatment.</p></div></div>
+      <div class="panel-bd flush"><div id="lots"></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><h2>Trade log</h2></div></div>
+      <div class="panel-bd flush"><div id="tradelog"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= METHOD ================= -->
+  <section id="p-method" role="tabpanel" hidden>
+    <div class="panel">
+      <div class="panel-hd"><div><h2>The committee</h2>
+        <p>Nine roles. Eight run in sequence on every decision; the ninth runs afterwards and grades the other eight.</p></div></div>
+      <div class="panel-bd flush"><div class="agentlist" id="rolelist"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hd"><div><h2>How a claim is graded</h2></div></div>
+      <div class="panel-bd" id="methodbody"></div>
+    </div>
+  </section>
+</main>
+
+<footer id="foot"></footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================ agent definitions ============================ */
+
+  var HOUSE = [
+    "You are one member of the Altovix investment committee, managing a small real-money personal portfolio.",
+    "",
+    "Rules that bind every member:",
+    "1. Use only the figures you are given. Never invent a price, a return, an earnings date, a headline or a filing. If you need something you were not given, name it as a gap and lower your confidence.",
+    "2. Confidence is a probability, not enthusiasm. 0.5 means a coin flip. Every confidence is recorded and later scored against what actually happened, so systematic overconfidence will show in your record.",
+    "3. Be specific enough to be wrong. 'Tech may face headwinds' is unscoreable. 'XLK underperforms SPY over 21 trading days' is a real claim.",
+    "4. The benchmark is SPY, not zero. Beating zero is not the bar.",
+    "5. Disagreeing with an earlier member is expected. Say so explicitly when you do.",
+    "",
+    "Reply with JSON only. No prose outside the JSON, no code fences."
+  ].join("\n");
+
+  var AGENTS = [
+    { id: "regime", n: "Market Regime", role: "Calls risk-on, neutral or risk-off, with a horizon",
+      quick: true,
+      brief: "Read the macro tape as a system: credit leading equities, small caps lagging, volatility expanding while price holds. Equities drift up most 21-day windows, so RISK_OFF is the higher bar and needs corroboration from more than one factor. NEUTRAL is a real answer.",
+      shape: {
+        regime: '"RISK_ON" | "NEUTRAL" | "RISK_OFF"',
+        confidence: "number 0-1",
+        horizonDays: "integer 5-63, trading days",
+        volatilityRegime: '"CALM" | "NORMAL" | "STRESSED"',
+        drivers: "array of 2-5 strings, each naming a reading and which way it points",
+        whatWouldChangeMyMind: "string, a specific observable reading",
+        summary: "string, two or three sentences"
+      } },
+    { id: "sector", n: "Sector Rotation", role: "Ranks leadership against SPY and places the candidate in it",
+      brief: "Defensives leading while cyclicals lag is a risk-off tell even in a rising tape. A sector strong over 3 months but weak over 1 month is decelerating, not leading. Only name a sector you would stand behind as a 21-day relative bet.",
+      shape: {
+        leaders: "array of 1-3 strings, sector ETF tickers you expect to beat SPY",
+        laggards: "array of 1-3 strings, sector ETF tickers you expect to lag SPY",
+        candidateSector: "string, the sector the candidate sits in, or UNKNOWN",
+        stance: '"TAILWIND" | "NEUTRAL" | "HEADWIND"',
+        confidence: "number 0-1",
+        horizonDays: "integer 10-63",
+        contradictsRegime: "boolean",
+        narrative: "string, what the rotation says about what the market is pricing"
+      } },
+    { id: "quant", n: "Quant Signal", role: "Reads the technical picture and commits to a direction",
+      quick: true,
+      brief: "Trend and momentum persist over 3-12 months and mean-revert over days. RSI above 70 in a strong uptrend is usually continuation; in a range it is exhaustion. Expanding volatility widens any stop and argues for smaller size. Direction and relative-to-SPY are separate calls and often differ.",
+      shape: {
+        trend: '"STRONG_UP" | "UP" | "SIDEWAYS" | "DOWN" | "STRONG_DOWN"',
+        setupQuality: "number 0-10, technical cleanliness of the entry only",
+        stretch: '"OVERBOUGHT" | "NEUTRAL" | "OVERSOLD"',
+        directionalCall: '"UP" | "DOWN" | "FLAT"',
+        beatsBenchmark: "boolean, does it beat SPY over the horizon",
+        horizonDays: "integer 5-63",
+        confidence: "number 0-1",
+        signalConflicts: "string, which signals disagree, or 'none'",
+        caveats: "string, what the data cannot tell you"
+      } },
+    { id: "research", n: "Research", role: "Writes the falsifiable thesis and the exit trigger",
+      brief: "You have price data only: no filings, no earnings, no news. You may use general knowledge of what the company does, but must not invent specific figures, dates, launches or analyst views. The question is never 'will it go up' but 'why this instead of SPY'. Write the exit trigger now, while you are still honest.",
+      shape: {
+        thesis: "string, 3-6 sentences, the actual argument",
+        catalyst: "string, the specific thing that would cause repricing",
+        keyRisks: "array of 2-4 strings",
+        exitTrigger: "string, checkable from price or a dated event",
+        vsSpyArgument: "string, why hold this instead of the index",
+        beatsSpy: "boolean",
+        horizonDays: "integer 21-252",
+        confidence: "number 0-1",
+        knowledgeLimits: "string, what you were not given and had to work without"
+      } },
+    { id: "risk", n: "Risk Manager", role: "Sizes the position, sets the stop, holds the veto",
+      brief: "Size from volatility, not conviction: conviction belongs in whether you act, not how big. Correlation above ~0.7 with something held means this is an add-on, not a new position. A single name above ~15% needs an argument. Cash is a position. A stop tighter than one 20-day standard deviation of daily moves will be hit by noise alone.",
+      shape: {
+        verdict: '"PROCEED" | "PROCEED_SMALLER" | "DECLINE_ON_RISK"',
+        recommendedSizePct: "number 0-25, percent of total portfolio value",
+        maxSizePct: "number 0-25",
+        stopRule: "string, e.g. '8% below entry' or 'close below the 200-day'",
+        expectedMaxDrawdownPct: "number, negative fraction e.g. -0.15",
+        drawdownConfidence: "number 0-1, probability the drawdown stays shallower than that",
+        horizonDays: "integer 21-126",
+        concerns: "string, concentration and correlation effects, or 'none'",
+        sizingRationale: "string, why this size and not double or half"
+      } },
+    { id: "bear", n: "Bear Case", role: "Argues against the trade, in terms that can be graded",
+      quick: true,
+      brief: "Attack the specific thesis you were handed, quoting its weakest part. Every risk needs a transmission mechanism: 'competition' is not a risk, 'margin compression as rivals price below them, visible first as decelerating growth' is. Give real probabilities. You must supply the strongest counter to your own case.",
+      shape: {
+        strongestBearCase: "string, the most damaging honest argument",
+        specificRisks: "array of 2-4 objects, each {risk, mechanism, probability (0-1), horizonDays, observableSignal}",
+        whatTheBullsAreMissing: "string, quoting the thesis specifically",
+        priceImpactIfRight: "number, negative fraction e.g. -0.25",
+        fallsOutright: "boolean, will it be lower than today at the end of your horizon",
+        horizonDays: "integer 10-126",
+        conviction: "number 0-1",
+        strongestCounterToMyself: "string"
+      } },
+    { id: "decision", n: "Final Decision", role: "Synthesises one action and owns the disagreement",
+      quick: true,
+      brief: "Synthesise, do not re-analyse. You may not size above the Risk Manager's ceiling; if you disagree, record that you were overruled and take the smaller size anyway. A strong bear case should change the size or the action, not be noted and ignored. Doing nothing is a real answer, and a committee that says BUY every time has learned nothing.",
+      shape: {
+        action: '"BUY" | "HOLD" | "AVOID" | "TRIM" | "SELL"',
+        sizePct: "number 0-25",
+        confidence: "number 0-1",
+        horizonDays: "integer 21-252",
+        rationale: "string, 3-5 sentences",
+        decisiveFactor: "string, the single input that decided it",
+        disagreementResolved: "string, where the committee split and how you resolved it",
+        overruled: "string, which agent you overrode and why, or 'none'",
+        exitRule: "string",
+        reviewInDays: "integer 5-126",
+        wouldSpyBeBetter: "boolean, honestly"
+      } },
+    { id: "journal", n: "Trade Journal", role: "Writes the record, including what would prove it wrong",
+      brief: "Write for a reader who has forgotten everything about today, including whether the trade worked. The most valuable field is what would make this wrong, written now, before the outcome is known. Do not make the decision sound better than the committee actually made it.",
+      shape: {
+        headline: "string, one line readable a year later",
+        thesisOneLine: "string",
+        aiScore: "number 0-10, how attractive the committee found this",
+        riskScore: "number 0-10, where 10 is riskiest",
+        whatWouldMakeThisWrong: "string, written now",
+        committeeTension: "string, where they disagreed, or 'none'",
+        postMortemPrompt: "string, the question to ask when the horizon closes"
+      } }
+  ];
+
+  var CALIBRATION_ROLE = { id: "calibration", n: "Calibration", role: "Grades the other eight against what actually happened" };
+
+  /* ============================ small helpers ============================ */
+
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  };
+  var money = function (v) {
+    if (v == null || !isFinite(v)) return "—";
+    return (v < 0 ? "-$" : "$") + Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  var pctS = function (v, dp) {
+    if (v == null || !isFinite(v)) return "—";
+    return (v > 0 ? "+" : "") + (v * 100).toFixed(dp == null ? 2 : dp) + "%";
+  };
+  var pctM = function (v, dp) {
+    if (v == null || !isFinite(v)) return "—";
+    return (v * 100).toFixed(dp == null ? 0 : dp) + "%";
+  };
+  var sign = function (v) { return v == null || !isFinite(v) ? "mut" : v > 0 ? "pos" : v < 0 ? "neg" : "mut"; };
+  var today = function () { return new Date().toISOString().slice(0, 10); };
+  var addDays = function (d, n) {
+    var t = new Date(d + "T00:00:00Z");
+    t.setUTCDate(t.getUTCDate() + n);
+    return t.toISOString().slice(0, 10);
+  };
+  var daysBetween = function (a, b) {
+    return Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000);
+  };
+  var uid = function () { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); };
+  var num = function (v, d) { var n = Number(v); return isFinite(n) ? n : (d == null ? null : d); };
+  var clamp01 = function (v) { var n = Number(v); return isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.5; };
+
+  /* ============================ state ============================ */
+
+  var state = { trades: [], marks: {}, runs: [], claims: [], plans: [], done: {}, ready: false, persisted: false };
+  var db = null, sample = null, currentRun = null, abortCtl = null;
+
+  var COLORS = ["#1D5F52", "#8A6012", "#3F6D8C", "#7A4A72", "#5C7A2E", "#A2382C", "#4A5568"];
+
+  /* ============================ tax lots ============================ */
+
+  function buildLots() {
+    var byId = {}, order = [], cash = 0;
+    var sorted = state.trades.slice().sort(function (a, b) {
+      return a.date === b.date ? String(a.ts).localeCompare(String(b.ts)) : a.date < b.date ? -1 : 1;
+    });
+    var closures = [];
+    sorted.forEach(function (t) {
+      if (t.side === "DEPOSIT") { cash += num(t.amount, 0); return; }
+      if (t.side === "WITHDRAW") { cash -= num(t.amount, 0); return; }
+      var shares = num(t.shares, 0), price = num(t.price, 0);
+      if (t.side === "BUY") {
+        cash -= shares * price;
+        var lot = { id: t.id, symbol: t.symbol, date: t.date, opened: shares, remaining: shares, cost: price, thesis: t.thesis || "" };
+        byId[t.id] = lot; order.push(lot);
+        return;
+      }
+      cash += shares * price;
+      var left = shares;
+      order.forEach(function (lot) {
+        if (left <= 1e-9 || lot.symbol !== t.symbol || lot.remaining <= 1e-9) return;
+        var qty = Math.min(lot.remaining, left);
+        var held = daysBetween(lot.date, t.date);
+        closures.push({
+          symbol: t.symbol, shares: qty, pnl: (price - lot.cost) * qty,
+          term: held > 365 ? "LONG" : "SHORT", held: held, date: t.date, openDate: lot.date
+        });
+        lot.remaining -= qty; left -= qty;
+      });
+    });
+    return { lots: order.filter(function (l) { return l.remaining > 1e-9; }), cash: cash, closures: closures };
+  }
+
+  function positions() {
+    var b = buildLots(), bySym = {};
+    b.lots.forEach(function (l) {
+      var p = bySym[l.symbol] || (bySym[l.symbol] = { symbol: l.symbol, shares: 0, basis: 0 });
+      p.shares += l.remaining; p.basis += l.remaining * l.cost;
+    });
+    var list = Object.keys(bySym).sort().map(function (k) {
+      var p = bySym[k];
+      var mark = num(state.marks[k], null);
+      p.avg = p.shares > 0 ? p.basis / p.shares : 0;
+      p.mark = mark;
+      p.value = mark == null ? null : mark * p.shares;
+      p.pnl = p.value == null ? null : p.value - p.basis;
+      p.pnlPct = p.value == null || p.basis === 0 ? null : p.value / p.basis - 1;
+      return p;
+    });
+    var invested = list.reduce(function (s, p) { return s + (p.value == null ? p.basis : p.value); }, 0);
+    var total = invested + b.cash;
+    list.forEach(function (p) { p.weight = total > 0 ? (p.value == null ? p.basis : p.value) / total : 0; });
+    return { list: list, cash: b.cash, total: total, invested: invested, lots: b.lots, closures: b.closures,
+      unrealised: list.reduce(function (s, p) { return s + (p.pnl || 0); }, 0),
+      priced: list.every(function (p) { return p.mark != null; }) };
+  }
+
+  /* ============================ calibration maths ============================ */
+
+  function brier(pairs) {
+    if (!pairs.length) return 0;
+    return pairs.reduce(function (s, p) { return s + Math.pow(p.c - p.o, 2); }, 0) / pairs.length;
+  }
+  function scoreAgent(agent, claims) {
+    var pairs = claims.filter(function (c) { return c.status === "RESOLVED" && (c.outcome === 0 || c.outcome === 1); })
+      .map(function (c) { return { c: clamp01(c.confidence), o: c.outcome }; });
+    if (!pairs.length) return null;
+    var n = pairs.length;
+    var hits = pairs.reduce(function (s, p) { return s + p.o; }, 0);
+    var hitRate = hits / n;
+    var avgConf = pairs.reduce(function (s, p) { return s + p.c; }, 0) / n;
+    var bs = brier(pairs);
+    var bsBase = brier(pairs.map(function (p) { return { c: hitRate, o: p.o }; }));
+    var bsCoin = brier(pairs.map(function (p) { return { c: 0.5, o: p.o }; }));
+    var buckets = [];
+    for (var lo = 0; lo < 0.999; lo += 0.2) {
+      var hi = lo + 0.2;
+      var inB = pairs.filter(function (p) { return hi >= 1 ? p.c >= lo : p.c >= lo && p.c < hi; });
+      if (!inB.length) continue;
+      buckets.push({
+        lo: lo, hi: hi, n: inB.length,
+        stated: inB.reduce(function (s, p) { return s + p.c; }, 0) / inB.length,
+        actual: inB.reduce(function (s, p) { return s + p.o; }, 0) / inB.length
+      });
+    }
+    return {
+      agent: agent, n: n, hits: hits, hitRate: hitRate, avgConf: avgConf,
+      over: avgConf - hitRate, brier: bs,
+      skill: bsBase > 1e-12 ? 1 - bs / bsBase : 0,
+      skillCoin: bsCoin > 1e-12 ? 1 - bs / bsCoin : 0,
+      buckets: buckets
+    };
+  }
+  function verdictFor(s) {
+    var out = [];
+    if (s.n < 20) out.push("Only " + s.n + " resolved — provisional.");
+    out.push("Right " + pctM(s.hitRate) + " of the time while claiming " + pctM(s.avgConf) + ".");
+    if (Math.abs(s.over) < 0.05) out.push("Well calibrated.");
+    else if (s.over > 0) out.push("Overconfident by " + Math.round(s.over * 100) + " points.");
+    else out.push("Underconfident by " + Math.round(-s.over * 100) + " points.");
+    if (s.skill > 0.05) out.push("Its confidence carries information.");
+    else if (s.skill < -0.05) out.push("Its confidence is anti-informative — you would do better using its base rate.");
+    else out.push("Its confidence adds little beyond its base rate.");
+    return out.join(" ");
+  }
+
+  /* ============================ claims from outputs ============================ */
+
+  function claimsFrom(agentId, out, symbol, madeOn) {
+    var c = [], hz;
+    var mk = function (kind, subject, statement, direction, threshold, confidence, horizonDays, resolver) {
+      c.push({
+        id: uid(), agent: agentId, kind: kind, subject: String(subject || symbol).toUpperCase(),
+        statement: statement, direction: direction, threshold: threshold == null ? null : threshold,
+        confidence: clamp01(confidence), horizonDays: Math.max(1, Math.round(num(horizonDays, 21))),
+        madeOn: madeOn, dueOn: addDays(madeOn, Math.round(Math.max(1, num(horizonDays, 21)) * 1.4) + 1),
+        resolver: resolver, status: "OPEN", outcome: null, note: "", ts: Date.now()
+      });
+    };
+    if (agentId === "regime") {
+      hz = out.horizonDays;
+      var dir = out.regime === "RISK_ON" ? "UP" : out.regime === "RISK_OFF" ? "DOWN" : "FLAT";
+      mk("REGIME_DIRECTION", "SPY",
+        "Regime " + out.regime + ": SPY " + (dir === "UP" ? "rises" : dir === "DOWN" ? "falls" : "stays within ±3%") +
+        " over " + num(hz, 21) + " trading days.", dir, 0.03, out.confidence, hz, "MECHANICAL");
+    }
+    if (agentId === "sector") {
+      hz = out.horizonDays;
+      (out.leaders || []).slice(0, 3).forEach(function (etf) {
+        mk("SECTOR_RELATIVE", etf, etf + " outperforms SPY over " + num(hz, 21) + " trading days.", "OUTPERFORM", null, out.confidence, hz, "MECHANICAL");
+      });
+      (out.laggards || []).slice(0, 3).forEach(function (etf) {
+        mk("SECTOR_RELATIVE", etf, etf + " underperforms SPY over " + num(hz, 21) + " trading days.", "UNDERPERFORM", null, out.confidence, hz, "MECHANICAL");
+      });
+    }
+    if (agentId === "quant") {
+      hz = out.horizonDays;
+      mk("PRICE_DIRECTION", symbol, symbol + " moves " + out.directionalCall + " over " + num(hz, 21) + " trading days.",
+        out.directionalCall, 0.02, out.confidence, hz, "MECHANICAL");
+      mk("RELATIVE_TO_BENCH", symbol, symbol + " " + (out.beatsBenchmark ? "outperforms" : "underperforms") + " SPY over " + num(hz, 21) + " trading days.",
+        out.beatsBenchmark ? "OUTPERFORM" : "UNDERPERFORM", null, out.confidence, hz, "MECHANICAL");
+    }
+    if (agentId === "research") {
+      hz = out.horizonDays;
+      mk("THESIS_PLAYS_OUT", symbol, "Thesis: " + String(out.thesis || "").slice(0, 300) + " | Catalyst: " + String(out.catalyst || ""),
+        "TRUE", null, out.confidence, hz, "JUDGMENT");
+      mk("RELATIVE_TO_BENCH", symbol, symbol + " " + (out.beatsSpy ? "outperforms" : "underperforms") + " SPY over " + num(hz, 63) + " trading days on the research thesis.",
+        out.beatsSpy ? "OUTPERFORM" : "UNDERPERFORM", null, out.confidence, hz, "MECHANICAL");
+    }
+    if (agentId === "risk") {
+      hz = out.horizonDays;
+      mk("DRAWDOWN_LIMIT", symbol, symbol + " max drawdown stays shallower than " + pctM(num(out.expectedMaxDrawdownPct, -0.2), 1) + " over " + num(hz, 63) + " trading days.",
+        "TRUE", num(out.expectedMaxDrawdownPct, -0.2), out.drawdownConfidence, hz, "MECHANICAL");
+    }
+    if (agentId === "bear") {
+      hz = out.horizonDays;
+      mk("PRICE_DIRECTION", symbol, "Bear case: " + symbol + " is " + (out.fallsOutright ? "lower" : "not lower") + " in " + num(hz, 21) + " trading days.",
+        out.fallsOutright ? "DOWN" : "UP", 0, out.conviction, hz, "MECHANICAL");
+      (out.specificRisks || []).slice(0, 4).forEach(function (r) {
+        mk("BEAR_RISK_MATERIALIZES", symbol, r.risk + " | mechanism: " + r.mechanism + " | visible as: " + r.observableSignal,
+          "TRUE", null, r.probability, r.horizonDays, "JUDGMENT");
+      });
+    }
+    if (agentId === "decision") {
+      hz = out.horizonDays;
+      var up = out.action === "BUY" || out.action === "HOLD";
+      mk("DECISION_VALUE", symbol,
+        out.action === "HOLD"
+          ? "HOLD " + symbol + ": it does not lag SPY by more than 2% over " + num(hz, 63) + " trading days."
+          : out.action + " " + symbol + ": it " + (up ? "beats" : "lags") + " SPY over " + num(hz, 63) + " trading days.",
+        up ? "OUTPERFORM" : "UNDERPERFORM", out.action === "HOLD" ? 0.02 : 0, out.confidence, hz, "MECHANICAL");
+    }
+    return c;
+  }
+
+  function gradeClaim(claim, subjectRet, benchRet, worstDrawdown) {
+    var s = num(subjectRet, null), b = num(benchRet, null);
+    var excess = s == null || b == null ? null : s - b;
+    switch (claim.kind) {
+      case "REGIME_DIRECTION":
+      case "PRICE_DIRECTION":
+        if (s == null) return null;
+        if (claim.direction === "UP") return s > 0 ? 1 : 0;
+        if (claim.direction === "DOWN") return s < 0 ? 1 : 0;
+        return Math.abs(s) <= (claim.threshold == null ? 0.03 : claim.threshold) ? 1 : 0;
+      case "SECTOR_RELATIVE":
+      case "RELATIVE_TO_BENCH":
+        if (excess == null) return null;
+        return claim.direction === "OUTPERFORM" ? (excess > 0 ? 1 : 0) : (excess < 0 ? 1 : 0);
+      case "DECISION_VALUE":
+        if (excess == null) return null;
+        var tol = claim.threshold || 0;
+        return claim.direction === "OUTPERFORM" ? (excess > -tol ? 1 : 0) : (excess < 0 ? 1 : 0);
+      case "DRAWDOWN_LIMIT":
+        var dd = num(worstDrawdown, null);
+        if (dd == null) return null;
+        return dd > (claim.threshold == null ? -0.2 : claim.threshold) ? 1 : 0;
+      default:
+        return null;
+    }
+  }
+
+  /* ============================ persistence ============================ */
+
+  function localSave() {
+    try { localStorage.setItem("altovix.v1", JSON.stringify({ trades: state.trades, marks: state.marks, runs: state.runs, claims: state.claims, plans: state.plans, done: state.done })); } catch (e) {}
+  }
+  function localLoad() {
+    try {
+      var raw = localStorage.getItem("altovix.v1");
+      if (!raw) return;
+      var d = JSON.parse(raw);
+      state.trades = d.trades || []; state.marks = d.marks || {};
+      state.runs = d.runs || []; state.claims = d.claims || [];
+      state.plans = d.plans || []; state.done = d.done || {};
+    } catch (e) {}
+  }
+
+  function persist(kind, item) {
+    localSave();
+    if (!db) return Promise.resolve();
+    try {
+      if (kind === "marks") return db.doc("book/marks").set({ marks: state.marks, updated: Date.now() });
+      return db.collection(kind).doc(item.id).set(item);
+    } catch (e) { return Promise.resolve(); }
+  }
+
+  async function connect() {
+    var got = await Promise.all([
+      window.claude && claude.use ? claude.use("db").catch(function () { return null; }) : null,
+      window.claude && claude.use ? claude.use("sample").catch(function () { return null; }) : null
+    ]);
+    db = got[0]; sample = got[1];
+
+    if (!sample) {
+      $("btn-run").disabled = true;
+      $("run-status").textContent = "Committee runs are unavailable in this view.";
+    }
+    if (db) {
+      state.persisted = true;
+      try {
+        ["trades", "runs", "claims"].forEach(function (name) {
+          db.collection(name).onSnapshot(function (snap) {
+            state[name] = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); })
+              .sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+            localSave(); renderAll();
+          }, function () {});
+        });
+        db.collection("plans").onSnapshot(function (snap) {
+          state.plans = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); })
+            .sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+          localSave(); renderAll();
+        }, function () {});
+        db.doc("book/marks").onSnapshot(function (snap) {
+          var d = snap.exists ? snap.data() : null;
+          if (d && d.marks) { state.marks = d.marks; localSave(); renderAll(); }
+        }, function () {});
+      } catch (e) { db = null; state.persisted = false; }
+    }
+    renderBanner();
+    renderAll();
+  }
+
+  function renderBanner() {
+    var el = $("statusbanner");
+    if (state.persisted) { el.innerHTML = ""; return; }
+    el.innerHTML = '<div class="banner warn" style="margin-top:16px">' +
+      '<span>Saved on this device only</span>' +
+      '<span>Shared storage is not available in this view, so trades, runs and claims are kept in this browser. ' +
+      'They will not follow you to another device.</span></div>';
+  }
+
+  /* ============================ the committee run ============================ */
+
+  function shapeText(shape) {
+    return Object.keys(shape).map(function (k) { return '  "' + k + '": ' + shape[k]; }).join(",\n");
+  }
+
+  function buildPrompt(agent, ctx, prior) {
+    var p = positions();
+    var book = p.list.length
+      ? p.list.map(function (x) { return x.symbol + " " + pctM(x.weight, 1) + " of book (" + (x.pnlPct == null ? "unmarked" : pctS(x.pnlPct, 1)) + ")"; }).join(", ")
+      : "no open positions";
+    var lines = [
+      HOUSE, "",
+      "YOUR ROLE: " + agent.n + " Agent. " + agent.role + ".",
+      agent.brief, "",
+      "=== DECISION UNDER REVIEW ===",
+      "Date: " + ctx.asOf,
+      "Candidate: " + ctx.symbol,
+      "Mandate: " + ctx.mandate,
+      "",
+      "=== PORTFOLIO ===",
+      "Total value " + money(p.total) + ", cash " + money(p.cash) +
+        (p.total > 0 ? " (" + pctM(p.cash / p.total, 0) + ")" : "") + ", " + p.list.length + " positions.",
+      "Holdings: " + book,
+      "",
+      "=== MARKET CONTEXT SUPPLIED BY THE OPERATOR ===",
+      ctx.context && ctx.context.trim()
+        ? ctx.context.trim()
+        : "(NOTHING WAS SUPPLIED. You have no prices, no returns, no indicators and no macro readings. " +
+          "Say so plainly, state what you would need, and set your confidence near 0.5 — do not manufacture figures to fill the gap.)"
+    ];
+    var order = AGENTS.map(function (a) { return a.id; });
+    var priorLines = [];
+    order.forEach(function (id) {
+      if (id === agent.id || !prior[id]) return;
+      var a = AGENTS.filter(function (x) { return x.id === id; })[0];
+      priorLines.push("--- " + a.n.toUpperCase() + " ---\n" + JSON.stringify(prior[id], null, 1));
+    });
+    if (priorLines.length) {
+      lines.push("", "=== REPORTS ALREADY FILED ===", priorLines.join("\n\n"));
+    }
+    lines.push("", "=== YOUR OUTPUT ===", "Reply with exactly this JSON object and nothing else:", "{", shapeText(agent.shape), "}");
+    return lines.join("\n");
+  }
+
+  function coerce(agent, raw) {
+    var out = raw && typeof raw === "object" ? raw : {};
+    Object.keys(agent.shape).forEach(function (k) {
+      var spec = agent.shape[k];
+      if (out[k] === undefined || out[k] === null) {
+        out[k] = /array/.test(spec) ? [] : /boolean/.test(spec) ? false : /number|integer/.test(spec) ? null : "—";
+      }
+    });
+    ["confidence", "conviction", "drawdownConfidence"].forEach(function (k) {
+      if (out[k] != null) out[k] = clamp01(out[k]);
+    });
+    return out;
+  }
+
+  async function runCommittee() {
+    if (!sample) return;
+    var symbol = ($("c-symbol").value || "").trim().toUpperCase();
+    if (!symbol) { $("c-symbol").focus(); $("run-status").textContent = "Enter a ticker first."; return; }
+
+    var ctx = {
+      symbol: symbol,
+      mandate: $("c-mandate").value,
+      context: $("c-context").value,
+      asOf: today()
+    };
+    var quick = $("c-depth").value === "quick";
+    var chain = AGENTS.filter(function (a) { return !quick || a.quick; });
+
+    currentRun = {
+      id: uid(), symbol: symbol, mandate: ctx.mandate, asOf: ctx.asOf,
+      depth: quick ? "quick" : "full", status: "RUNNING", outputs: {}, errors: {},
+      action: null, confidence: null, sizePct: null, context: ctx.context || "", ts: Date.now()
+    };
+    abortCtl = new AbortController();
+
+    $("btn-run").disabled = true;
+    $("btn-cancel").hidden = false;
+    $("run-panel").hidden = false;
+    $("btn-savedecision").hidden = true;
+    $("run-title").textContent = symbol + " — " + (quick ? "quick committee" : "full committee");
+    $("run-sub").textContent = ctx.mandate.replace("_", " ").toLowerCase() + " · " + ctx.asOf +
+      (ctx.context.trim() ? "" : " · no market context supplied, confidences will be low");
+    renderAgents(chain);
+
+    var prior = {}, failed = null;
+    for (var i = 0; i < chain.length; i++) {
+      var agent = chain[i];
+      currentRun.running = agent.id;
+      renderAgents(chain);
+      var started = Date.now();
+      try {
+        var json = await sample.json(buildPrompt(agent, ctx, prior), {
+          modelTier: agent.id === "research" || agent.id === "bear" ? "complex" : "default",
+          signal: abortCtl.signal
+        });
+        var out = coerce(agent, json);
+        currentRun.outputs[agent.id] = out;
+        currentRun.timings = currentRun.timings || {};
+        currentRun.timings[agent.id] = Date.now() - started;
+        prior[agent.id] = out;
+      } catch (err) {
+        var code = (err && err.code) || "error";
+        if (code === "cancelled") { failed = "Stopped."; break; }
+        currentRun.errors[agent.id] = (err && err.message) || code;
+        failed = agent.n + " failed: " + ((err && err.message) || code);
+        break;
+      }
+      renderAgents(chain);
+    }
+
+    currentRun.running = null;
+    currentRun.status = failed ? "FAILED" : "COMPLETE";
+    currentRun.error = failed || null;
+
+    var d = currentRun.outputs.decision;
+    if (d) { currentRun.action = d.action; currentRun.confidence = d.confidence; currentRun.sizePct = num(d.sizePct, null); }
+
+    if (!failed) {
+      var newClaims = [];
+      Object.keys(currentRun.outputs).forEach(function (id) {
+        newClaims = newClaims.concat(
+          claimsFrom(id, currentRun.outputs[id], symbol, ctx.asOf).map(function (c) { return Object.assign(c, { runId: currentRun.id }); })
+        );
+      });
+      currentRun.claimCount = newClaims.length;
+      state.claims = newClaims.concat(state.claims);
+      newClaims.forEach(function (c) { persist("claims", c); });
+    }
+
+    state.runs = [currentRun].concat(state.runs.filter(function (r) { return r.id !== currentRun.id; }));
+    persist("runs", currentRun);
+
+    $("btn-run").disabled = false;
+    $("btn-cancel").hidden = true;
+    $("run-status").textContent = failed
+      ? failed
+      : "Done — " + (currentRun.claimCount || 0) + " claims recorded for grading.";
+    if (d) $("btn-savedecision").hidden = false;
+    renderAgents(chain);
+    renderAll();
+  }
+
+  /* ============================ rendering ============================ */
+
+  function renderAgents(chain) {
+    var host = $("agents");
+    if (!currentRun) { host.innerHTML = ""; return; }
+    host.innerHTML = chain.map(function (a, i) {
+      var out = currentRun.outputs[a.id];
+      var err = currentRun.errors[a.id];
+      var running = currentRun.running === a.id;
+      var stateHtml = running ? '<span class="spinner"></span>'
+        : err ? '<span class="agent-state" style="color:var(--neg)">failed</span>'
+        : out ? '<span class="agent-state">' + ((currentRun.timings && currentRun.timings[a.id]) ? Math.round(currentRun.timings[a.id] / 100) / 10 + "s" : "done") + '</span>'
+        : '<span class="agent-state">queued</span>';
+      var body = "";
+      if (err) body = '<div class="agent-bd"><div class="banner bad"><span>' + esc(err) + '</span></div></div>';
+      else if (out) body = '<div class="agent-bd">' + renderOutput(a, out) + '</div>';
+      return '<div class="agent">' +
+        '<button class="agent-hd" type="button" ' + (out || err ? "" : "disabled") + ' data-toggle="' + a.id + '">' +
+        '<span class="seq">' + (i + 1) + '</span>' +
+        '<span class="agent-name">' + esc(a.n) + '</span>' +
+        '<span class="agent-role">' + esc(a.role) + '</span>' + stateHtml + '</button>' + body + '</div>';
+    }).join("");
+  }
+
+  var HEADLINE = {
+    regime: ["regime", "confidence"], sector: ["stance", "confidence"], quant: ["directionalCall", "confidence"],
+    research: ["beatsSpy", "confidence"], risk: ["verdict", "recommendedSizePct"],
+    bear: ["fallsOutright", "conviction"], decision: ["action", "confidence"], journal: ["aiScore", "riskScore"]
+  };
+
+  function renderOutput(agent, out) {
+    // Render every field the agent actually returned (runs made by the repo carry richer
+    // outputs than this page's compact shapes), keeping the page's own field order first.
+    var keys = Object.keys(agent.shape).filter(function (k) { return k in out; })
+      .concat(Object.keys(out).filter(function (k) { return !(k in agent.shape); }));
+    var rows = keys.map(function (k) {
+      var v = out[k];
+      var isNum = typeof v === "number";
+      var text;
+      if (Array.isArray(v)) {
+        text = v.length
+          ? "<ul style='margin:0;padding-left:16px'>" + v.map(function (x) {
+              return "<li>" + (x && typeof x === "object"
+                ? "<b>" + esc(x.risk || x.etf || x.factor || x.name || "") + "</b>" +
+                  (x.reading ? " — " + esc(x.reading) : "") +
+                  (x.why ? " — " + esc(x.why) : "") +
+                  (x.mechanism ? " — " + esc(x.mechanism) : "") +
+                  (x.observableSignal ? " <span class='mut'>Signal: " + esc(x.observableSignal) + "</span>" : "") +
+                  (x.leans ? " <span class='pill'>" + esc(x.leans) + "</span>" : "") +
+                  (x.probability != null ? " <span class='mut'>(p " + clamp01(x.probability).toFixed(2) + ", " + num(x.horizonDays, 21) + "d)</span>" : "") +
+                  (x.confidence != null && x.probability == null ? " <span class='mut'>(conf " + clamp01(x.confidence).toFixed(2) + ")</span>" : "") +
+                  (!(x.risk || x.etf || x.factor || x.name) ? esc(JSON.stringify(x)) : "")
+                : esc(x)) + "</li>";
+            }).join("") + "</ul>"
+          : "<span class='mut'>none</span>";
+      } else if (typeof v === "boolean") text = v ? "yes" : "no";
+      else if (isNum) text = /Pct|pct/.test(k) && Math.abs(v) <= 1 && k.indexOf("size") === -1 && k.indexOf("Size") === -1
+        ? pctS(v, 1) : String(Math.round(v * 1000) / 1000);
+      else text = esc(v);
+      var label = k.replace(/([A-Z])/g, " $1").replace(/^./, function (m) { return m.toUpperCase(); });
+      return "<dt>" + esc(label) + "</dt><dd class='" + (isNum ? "mono" : "") + "'>" + text + "</dd>";
+    }).join("");
+    return "<dl class='kv'>" + rows + "</dl>";
+  }
+
+  function table(cols, rows, emptyTitle, emptyBody) {
+    if (!rows.length) return '<div class="empty"><strong>' + esc(emptyTitle) + '</strong>' + esc(emptyBody) + '</div>';
+    return '<div class="tablewrap"><table><thead><tr>' +
+      cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") +
+      "</tr></thead><tbody>" + rows.join("") + "</tbody></table></div>";
+  }
+
+  function renderDash() {
+    var p = positions();
+    $("s-total").textContent = state.trades.length ? money(p.total) : "—";
+    $("s-total-sub").textContent = state.trades.length
+      ? (p.priced ? "all positions marked" : "some positions unmarked")
+      : "no book yet";
+    $("s-cash").textContent = state.trades.length ? money(p.cash) : "—";
+    $("s-cash-sub").textContent = p.total > 0 ? pctM(p.cash / p.total, 1) + " of book" : "—";
+    var un = $("s-unreal");
+    un.textContent = p.list.length ? money(p.unrealised) : "—";
+    un.className = "v " + sign(p.unrealised);
+    $("s-runs").textContent = state.runs.length;
+    var last = state.runs[0];
+    $("s-runs-sub").textContent = last ? "last: " + last.symbol + " " + (last.action || last.status) : "none yet";
+
+    var open = state.claims.filter(function (c) { return c.status === "OPEN"; });
+    var due = open.filter(function (c) { return c.dueOn <= today(); });
+    $("s-claims").textContent = open.length;
+    $("s-claims-sub").textContent = due.length ? due.length + " due for grading" : (open.length ? "none due yet" : "none recorded");
+    $("cal-dot").classList.toggle("hide", due.length === 0);
+
+    $("positions").innerHTML = table(
+      ["Symbol", "Shares", "Avg cost", "Mark", "Value", "Unrealised", "Weight"],
+      p.list.map(function (x) {
+        return "<tr><td>" + esc(x.symbol) + "</td>" +
+          "<td>" + (Math.round(x.shares * 1e4) / 1e4) + "</td>" +
+          "<td>" + money(x.avg) + "</td>" +
+          "<td class='" + (x.mark == null ? "mut" : "") + "'>" + (x.mark == null ? "unmarked" : money(x.mark)) + "</td>" +
+          "<td>" + money(x.value) + "</td>" +
+          "<td class='" + sign(x.pnl) + "'>" + (x.pnl == null ? "—" : money(x.pnl) + "  " + pctS(x.pnlPct, 1)) + "</td>" +
+          "<td>" + pctM(x.weight, 1) + "</td></tr>";
+      }),
+      "No positions yet",
+      "Record a deposit and a buy in the Book tab, or run the committee first and log the trade it recommends."
+    );
+
+    var seg = p.list.filter(function (x) { return x.weight > 0; });
+    var cashW = p.total > 0 ? p.cash / p.total : 1;
+    if (!seg.length && cashW <= 0) {
+      $("allocation").innerHTML = '<p class="note">Nothing allocated yet.</p>';
+    } else {
+      var bar = seg.map(function (x, i) {
+        return '<span style="width:' + Math.max(0, x.weight * 100) + '%;background:' + COLORS[i % COLORS.length] + '"></span>';
+      }).join("") + '<span style="width:' + Math.max(0, cashW * 100) + '%;background:var(--surface-2)"></span>';
+      var legend = seg.map(function (x, i) {
+        return '<span><i class="swatch" style="background:' + COLORS[i % COLORS.length] + '"></i><b>' + esc(x.symbol) + '</b> ' + pctM(x.weight, 1) + '</span>';
+      }).join("") + '<span><i class="swatch" style="background:var(--surface-2)"></i><b>Cash</b> ' + pctM(cashW, 1) + '</span>';
+      $("allocation").innerHTML = '<div class="alloc">' + bar + '</div><div class="alloclegend">' + legend + '</div>';
+    }
+
+    $("decisions").innerHTML = table(
+      ["Date", "Symbol", "Action", "Size", "Confidence", "Horizon", "Claims"],
+      state.runs.slice(0, 10).map(function (r) {
+        var cls = (r.action || "").toLowerCase();
+        var d = r.outputs && r.outputs.decision;
+        return "<tr><td>" + esc(r.asOf) + "</td><td>" + esc(r.symbol) + "</td>" +
+          "<td><span class='pill " + esc(cls) + "'>" + esc(r.action || r.status) + "</span></td>" +
+          "<td>" + (r.sizePct == null ? "—" : r.sizePct + "%") + "</td>" +
+          "<td>" + (r.confidence == null ? "—" : pctM(r.confidence)) + "</td>" +
+          "<td>" + (d ? num(d.horizonDays, 0) + "d" : "—") + "</td>" +
+          "<td>" + (r.claimCount || 0) + "</td></tr>";
+      }),
+      "No committee runs yet",
+      "Open the Committee tab, enter a ticker, and convene it."
+    );
+
+    $("tab-trades").textContent = state.trades.length;
+  }
+
+  function renderCommitteeList() {
+    $("runlist").innerHTML = table(
+      ["Date", "Symbol", "Mandate", "Model", "Outcome", "Claims"],
+      state.runs.map(function (r) {
+        return "<tr data-run='" + esc(r.id) + "' style='cursor:pointer'><td>" + esc(r.asOf) + "</td><td>" + esc(r.symbol) + "</td>" +
+          "<td class='mut'>" + esc(String(r.mandate || "").replace("_", " ").toLowerCase()) + "</td>" +
+          "<td class='mut'>" + esc(r.model || (r.depth === "quick" ? "quick · this page" : "this page")) + "</td>" +
+          "<td><span class='pill " + esc((r.action || "").toLowerCase()) + "'>" + esc(r.action || r.status) + "</span></td>" +
+          "<td>" + (r.claimCount || 0) + "</td></tr>";
+      }),
+      "Nothing convened yet",
+      "Each run is stored whole — every agent's reasoning, not just the answer."
+    );
+  }
+
+  function renderCalibration() {
+    var now = today();
+    var due = state.claims.filter(function (c) { return c.status === "OPEN" && c.dueOn <= now; });
+
+    $("due").innerHTML = due.length
+      ? due.map(function (c) {
+          var mech = c.resolver === "MECHANICAL";
+          return '<div style="padding:14px 16px;border-bottom:1px solid var(--line)">' +
+            '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">' +
+              '<span class="pill open">' + esc(c.agent) + '</span>' +
+              '<span class="eyebrow">' + esc(c.subject) + ' · ' + num(c.horizonDays, 0) + 'd · stated ' + pctM(c.confidence) + '</span>' +
+            '</div>' +
+            '<p style="font-size:13.5px;margin-bottom:9px">' + esc(c.statement) + '</p>' +
+            (mech
+              ? '<div class="row" data-claim="' + esc(c.id) + '">' +
+                  '<div class="field" style="flex:0 0 120px"><label>' + esc(c.subject) + ' return</label>' +
+                    '<input type="number" step="any" class="mono j-sub" placeholder="%"></div>' +
+                  '<div class="field" style="flex:0 0 120px"><label>SPY return</label>' +
+                    '<input type="number" step="any" class="mono j-bench" placeholder="%"></div>' +
+                  (c.kind === "DRAWDOWN_LIMIT"
+                    ? '<div class="field" style="flex:0 0 120px"><label>Worst drawdown</label><input type="number" step="any" class="mono j-dd" placeholder="-12"></div>' : "") +
+                  '<button class="btn sm j-grade" type="button">Grade</button>' +
+                  '<button class="btn ghost sm j-void" type="button">Void</button>' +
+                '</div>'
+              : '<div class="row" data-claim="' + esc(c.id) + '">' +
+                  '<span class="note" style="flex:1 1 220px">Judgement call — did this actually happen, as stated?</span>' +
+                  '<button class="btn sm j-true" type="button">It held</button>' +
+                  '<button class="btn ghost sm j-false" type="button">It did not</button>' +
+                  '<button class="btn ghost sm j-void" type="button">Can\'t tell</button>' +
+                '</div>') +
+            '</div>';
+        }).join("")
+      : '<div class="empty"><strong>Nothing due</strong>Claims appear here the day their horizon closes. That is the only moment the answer is knowable and the reasoning is still on record.</div>';
+
+    var byAgent = {};
+    state.claims.forEach(function (c) { (byAgent[c.agent] = byAgent[c.agent] || []).push(c); });
+    var scores = Object.keys(byAgent).map(function (a) { return scoreAgent(a, byAgent[a]); })
+      .filter(Boolean).sort(function (a, b) { return b.n - a.n; });
+
+    $("scorecard").innerHTML = scores.length
+      ? scores.map(function (s) {
+          var name = (AGENTS.filter(function (a) { return a.id === s.agent; })[0] || { n: s.agent }).n;
+          var rel = s.buckets.map(function (b) {
+            var gap = b.stated - b.actual;
+            return '<div class="relrow">' +
+              '<span>' + Math.round(b.lo * 100) + "–" + Math.round(b.hi * 100) + '%</span>' +
+              '<div class="reltrack" title="claimed ' + pctM(b.stated) + ', right ' + pctM(b.actual) + '">' +
+                '<i class="relfill" style="width:' + Math.max(1.5, b.actual * 100) + '%"></i>' +
+                '<i class="reltick" style="left:calc(' + (b.stated * 100) + '% - 1px)"></i></div>' +
+              '<span class="relgap">' + pctM(b.actual) + ' right · n=' + b.n +
+                (Math.abs(gap) >= 0.1 ? ' · <b style="color:' + (gap > 0 ? "var(--neg)" : "var(--pos)") + '">' +
+                  (gap > 0 ? "over" : "under") + " " + Math.round(Math.abs(gap) * 100) + '</b>' : "") +
+              '</span></div>';
+          }).join("");
+          return '<div style="padding:15px 16px;border-bottom:1px solid var(--line)">' +
+            '<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap">' +
+              '<h3 style="font-size:15px">' + esc(name) + '</h3>' +
+              '<span class="eyebrow">' + s.n + ' resolved · ' + s.hits + ' right</span></div>' +
+            '<div class="grid3" style="margin:11px 0 12px">' +
+              statTile("Hit rate", pctM(s.hitRate)) +
+              statTile("Stated confidence", pctM(s.avgConf)) +
+              statTile(s.over >= 0 ? "Overconfident by" : "Underconfident by", Math.abs(Math.round(s.over * 100)) + " pts") +
+              statTile("Brier", s.brier.toFixed(3)) +
+              statTile("Brier skill", (s.skill > 0 ? "+" : "") + s.skill.toFixed(2)) +
+            '</div>' +
+            (s.buckets.length
+              ? '<div class="eyebrow" style="margin-top:14px">By stated confidence</div>' +
+                '<div class="reliability">' + rel + '</div>' +
+                '<div class="rellegend"><span><i class="swatch" style="background:var(--gold)"></i>how often it was right</span>' +
+                '<span><i class="swatch" style="background:var(--accent);width:2px;height:11px"></i>what it claimed</span></div>'
+              : "") +
+            '<p class="note" style="margin-top:9px">' + esc(verdictFor(s)) + '</p></div>';
+        }).join("")
+      : '<div class="empty"><strong>No graded claims yet</strong>Run the committee, then come back when the first horizon closes. The scorecard is the whole point — an unevaluated committee is just an expensive opinion.</div>';
+
+    $("claimlist").innerHTML = table(
+      ["Made", "Agent", "Claim", "Conf.", "Due", "Result"],
+      state.claims.slice(0, 60).map(function (c) {
+        var res = c.status === "RESOLVED"
+          ? '<span class="pill ' + (c.outcome === 1 ? "hit" : "miss") + '">' + (c.outcome === 1 ? "hit" : "miss") + "</span>"
+          : c.status === "VOID" ? '<span class="pill">void</span>' : '<span class="pill open">open</span>';
+        return "<tr><td>" + esc(c.madeOn) + "</td><td>" + esc(c.agent) + "</td>" +
+          "<td class='mut' style='max-width:280px;white-space:normal'>" + esc(c.statement) + "</td>" +
+          "<td>" + pctM(c.confidence) + "</td><td>" + esc(c.dueOn) + "</td><td>" + res + "</td></tr>";
+      }),
+      "No claims recorded",
+      "Claims are created automatically from every committee run."
+    );
+  }
+
+  function statTile(k, v) {
+    return '<div><div class="eyebrow">' + esc(k) + '</div><div style="font-family:var(--f-mono);font-size:17px;font-variant-numeric:tabular-nums">' + esc(v) + "</div></div>";
+  }
+
+  function renderBook() {
+    var p = positions();
+    $("lots").innerHTML = table(
+      ["Symbol", "Opened", "Shares", "Cost", "Held", "Term", "To long-term"],
+      p.lots.map(function (l) {
+        var held = daysBetween(l.date, today());
+        var lt = held > 365;
+        return "<tr><td>" + esc(l.symbol) + "</td><td>" + esc(l.date) + "</td>" +
+          "<td>" + (Math.round(l.remaining * 1e4) / 1e4) + "</td><td>" + money(l.cost) + "</td>" +
+          "<td>" + held + "d</td>" +
+          "<td><span class='pill " + (lt ? "hit" : "") + "'>" + (lt ? "long" : "short") + "</span></td>" +
+          "<td class='" + (lt ? "mut" : "") + "'>" + (lt ? "—" : Math.max(0, 366 - held) + "d") + "</td></tr>";
+      }),
+      "No open lots",
+      "Every buy opens its own lot so cost basis and holding period stay exact."
+    );
+
+    $("tradelog").innerHTML = table(
+      ["Date", "Side", "Symbol", "Shares", "Price", "Cash"],
+      state.trades.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }).slice(0, 40).map(function (t) {
+        var cash = t.side === "DEPOSIT" ? num(t.amount, 0)
+          : t.side === "WITHDRAW" ? -num(t.amount, 0)
+          : (t.side === "BUY" ? -1 : 1) * num(t.shares, 0) * num(t.price, 0);
+        return "<tr><td>" + esc(t.date) + "</td>" +
+          "<td><span class='pill " + (t.side === "BUY" || t.side === "DEPOSIT" ? "buy" : "sell") + "'>" + esc(t.side) + "</span></td>" +
+          "<td>" + esc(t.symbol || "—") + "</td><td>" + (t.shares ? Math.round(t.shares * 1e4) / 1e4 : "—") + "</td>" +
+          "<td>" + (t.price ? money(t.price) : "—") + "</td>" +
+          "<td class='" + sign(cash) + "'>" + money(cash) + "</td></tr>";
+      }),
+      "No trades yet",
+      "Start with a deposit, then record buys as you make them."
+    );
+
+    var realised = p.closures.reduce(function (s, c) { return s + c.pnl; }, 0);
+    if (p.closures.length) {
+      var wins = p.closures.filter(function (c) { return c.pnl > 0; }).length;
+      $("tradelog").insertAdjacentHTML("afterbegin",
+        '<div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:22px;flex-wrap:wrap">' +
+        statTile("Closed lots", String(p.closures.length)) +
+        statTile("Win rate", pctM(wins / p.closures.length)) +
+        statTile("Realised", money(realised)) + "</div>");
+    }
+  }
+
+  function renderMethod() {
+    $("rolelist").innerHTML = AGENTS.concat([CALIBRATION_ROLE]).map(function (a, i) {
+      return '<div class="agent"><div class="agent-hd" style="cursor:default">' +
+        '<span class="seq">' + (a.id === "calibration" ? "—" : i + 1) + '</span>' +
+        '<span class="agent-name">' + esc(a.n) + '</span>' +
+        '<span class="agent-role">' + esc(a.role) + '</span></div></div>';
+    }).join("");
+
+    $("methodbody").innerHTML = [
+      '<p class="note" style="max-width:68ch;margin-bottom:12px">Every agent output is turned into claims: specific, dated statements with a stated probability. When the horizon closes, each one is settled.</p>',
+      '<dl class="kv" style="grid-template-columns:200px 1fr">',
+      "<dt>Regime direction</dt><dd>Risk-on means SPY rises over the horizon; risk-off means it falls; neutral means it stays inside ±3%.</dd>",
+      "<dt>Sector relative</dt><dd>The named sector ETF beats or lags SPY. Direction alone does not count.</dd>",
+      "<dt>Price direction</dt><dd>The candidate rises or falls outright.</dd>",
+      "<dt>Relative to benchmark</dt><dd>The candidate beats or lags SPY. A stock that rose 4% while SPY rose 10% failed this one.</dd>",
+      "<dt>Drawdown limit</dt><dd>The worst peak-to-trough over the horizon stayed shallower than the risk manager said it would.</dd>",
+      "<dt>Decision value</dt><dd>Did the action beat simply holding SPY? A hold is graded inside a 2% band.</dd>",
+      "<dt>Thesis / bear risk</dt><dd>Judgement calls. Graded by hand, or by the calibration agent against the price path — and graded on the claim as stated, not a more reasonable version of it.</dd>",
+      "</dl>",
+      '<p class="note" style="max-width:68ch;margin-top:14px"><b>Brier skill</b> compares each agent against a forecaster that just predicts its own base rate. Above zero, its confidence carries information. Below zero, the number is worse than useless and you should ignore it.</p>'
+    ].join("");
+  }
+
+
+  /* ============================ today & lists ============================ */
+
+  var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function fmtDate(d) {
+    var t = new Date(d + "T00:00:00Z");
+    return { day: t.getUTCDate(), mon: MONTHS[t.getUTCMonth()], dow: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][t.getUTCDay()] };
+  }
+  function doneKey(planId, symbol, i) { return planId + "|" + symbol + "|" + i; }
+  function runFor(runId) { return state.runs.filter(function (r) { return r.id === runId; })[0]; }
+
+  function renderToday() {
+    var now = today();
+    var t = new Date(now + "T00:00:00Z");
+    $("today-date").textContent = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][t.getUTCDay()] + " " + t.getUTCDate() + " " + MONTHS[t.getUTCMonth()] + " " + t.getUTCFullYear();
+
+    var plans = state.plans;
+    var latest = plans.slice().sort(function (a, b) { return (b.asOf || "") < (a.asOf || "") ? -1 : 1; })[0];
+    $("today-regime").innerHTML = latest && latest.regime
+      ? '<div class="regime"><span class="tag">REGIME · ' + esc(latest.regime.label) + ' · ' + pctM(latest.regime.confidence) + '</span><p>' + esc(latest.regime.summary) + '</p></div>'
+      : "";
+
+    // install hint
+    var ua = navigator.userAgent || "";
+    var isIOS = /iPhone|iPad|iPod/.test(ua), isAndroid = /Android/.test(ua);
+    var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    var dismissed = false;
+    try { dismissed = localStorage.getItem("altovix.install") === "1"; } catch (e) {}
+    $("install-hint").innerHTML = (isIOS || isAndroid) && !standalone && !dismissed
+      ? '<div class="install"><div><b>Put Altovix on your home screen</b>' +
+          (isIOS ? "In Safari: tap the Share button, then <i>Add to Home Screen</i>. It opens like an app."
+                 : "In Chrome: tap the ⋮ menu, then <i>Add to Home screen</i>. It opens like an app.") +
+        '</div><button type="button" id="install-dismiss">Got it</button></div>'
+      : "";
+
+    // do now: dated tranches whose date has arrived
+    var dos = [];
+    plans.forEach(function (p) {
+      (p.items || []).forEach(function (it) {
+        (it.tranches || []).forEach(function (tr, i) {
+          if (!tr.date || tr.date > now) return;
+          dos.push({ plan: p, item: it, tr: tr, i: i, key: doneKey(p.id, it.symbol, i) });
+        });
+      });
+    });
+    dos.sort(function (a, b) { return (b.tr.pct || 0) - (a.tr.pct || 0); });
+    $("today-do").innerHTML = dos.length
+      ? dos.map(function (d) {
+          var checked = !!state.done[d.key];
+          return '<label class="todo' + (checked ? " done" : "") + '"><input type="checkbox" data-done="' + esc(d.key) + '"' + (checked ? " checked" : "") + '>' +
+            '<span class="t"><b>' + esc(d.item.action) + " " + esc(d.item.symbol) + '</b> <span class="mut">· ' + esc(d.plan.shortName || d.plan.name) + '</span>' +
+            '<div class="sub">' + esc(d.tr.label || "") + (d.tr.condition ? " — " + esc(d.tr.condition) : "") +
+            (d.item.stop ? '<br>Stop: ' + esc(d.item.stop) : "") + '</div></span>' +
+            '<span class="amt">' + d.tr.pct + '%</span></label>';
+        }).join("")
+      : '<div class="empty"><strong>Nothing due today</strong>Tranches appear here on the day their plan says to act.</div>';
+
+    // watching: conditional tranches, re-open rules, stops for held/planned names
+    var watch = [];
+    plans.forEach(function (p) {
+      (p.items || []).forEach(function (it) {
+        (it.tranches || []).forEach(function (tr, i) {
+          if (tr.date || !tr.condition) return;
+          if (state.done[doneKey(p.id, it.symbol, i)]) return;
+          watch.push({ sym: it.symbol, what: "Add " + tr.pct + "% " + tr.condition, kind: "entry" });
+        });
+        if (it.action === "AVOID" && it.reopen) watch.push({ sym: it.symbol, what: "Re-open: " + it.reopen, kind: "reopen" });
+        if (it.action !== "AVOID" && it.stop) watch.push({ sym: it.symbol, what: "Exit on " + it.stop, kind: "stop" });
+      });
+    });
+    var order = { entry: 0, reopen: 1, stop: 2 };
+    watch.sort(function (a, b) { return order[a.kind] - order[b.kind] || a.sym.localeCompare(b.sym); });
+    $("today-watch").innerHTML = watch.length
+      ? watch.map(function (w) { return '<div class="watch"><b>' + esc(w.sym) + '</b><span>' + esc(w.what) + '</span></div>'; }).join("")
+      : '<div class="empty"><strong>Nothing to watch</strong>Run the committee and its rules will appear here.</div>';
+
+    // coming up
+    var horizon = addDays(now, 30);
+    var evts = [];
+    plans.forEach(function (p) { (p.calendar || []).forEach(function (c) { if (c.date >= now && c.date <= horizon) evts.push(Object.assign({ plan: p }, c)); }); });
+    evts.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    var due = state.claims.filter(function (c) { return c.status === "OPEN" && c.dueOn <= now; }).length;
+    $("today-grade-btn").hidden = due === 0;
+    if (due) $("today-grade-btn").textContent = "Grade " + due + " due claim" + (due === 1 ? "" : "s");
+    $("today-events").innerHTML = evts.length
+      ? evts.map(function (e) {
+          var f = fmtDate(e.date);
+          return '<div class="evt' + (e.date === now ? " today" : "") + (e.kind === "calibration" ? " cal" : "") + '">' +
+            '<div class="d"><b>' + f.day + ' ' + f.mon + '</b>' + f.dow + '</div>' +
+            '<div class="l">' + esc(e.label) + ((e.symbols || []).length ? '<div class="syms">' + esc(e.symbols.join(" · ")) + '</div>' : "") + '</div></div>';
+        }).join("")
+      : '<div class="empty"><strong>No dated events</strong>Nothing on the calendar in the next 30 days.</div>';
+  }
+
+  function renderLists() {
+    var host = $("lists");
+    if (!state.plans.length) {
+      host.innerHTML = '<div class="panel"><div class="empty"><strong>No lists yet</strong>Committee plans appear here once they are loaded.</div></div>';
+      return;
+    }
+    host.innerHTML = state.plans.map(function (p) {
+      var items = (p.items || []).slice().sort(function (a, b) {
+        var oa = a.action === "AVOID" ? 1 : 0, ob = b.action === "AVOID" ? 1 : 0;
+        return oa - ob || (b.sizePct || 0) - (a.sizePct || 0) || (b.confidence || 0) - (a.confidence || 0);
+      });
+      var buys = items.filter(function (i) { return i.action !== "AVOID"; });
+      var sized = buys.reduce(function (s, i) { return s + (i.sizePct || 0); }, 0);
+      return '<div class="panel"><div class="list-hd"><div><h2>' + esc(p.name) + '</h2>' +
+        '<div class="eyebrow">as of ' + esc(p.asOf) + ' · ' + buys.length + ' buy · ' + (items.length - buys.length) + ' avoid · ' +
+        Math.round(sized * 10) / 10 + '% if every tranche fills</div></div></div>' +
+        '<div class="cards">' + items.map(function (it) {
+          var run = runFor(it.runId);
+          var cls = String(it.action || "").toLowerCase();
+          return '<button class="card" type="button" ' + (run ? 'data-run="' + esc(run.id) + '"' : "") + '>' +
+            '<span class="sym">' + esc(it.symbol) + '</span>' +
+            '<span class="meta"><span class="pill ' + esc(cls) + '">' + esc(it.action) + '</span>' +
+              (it.sizePct ? '<span>' + it.sizePct + '%</span>' : "") +
+              '<span title="confidence"><i class="confbar"><i style="width:' + Math.round((it.confidence || 0) * 100) + '%"></i></i> ' + pctM(it.confidence) + '</span>' +
+              (it.review ? '<span>review ' + esc(it.review.slice(5)) + '</span>' : "") + '</span>' +
+            '<span class="chev">›</span>' +
+            '<span class="why">' + esc(it.thesis) + '</span>' +
+            (it.stop ? '<span class="stop"><b>Stop</b> ' + esc(it.stop) + '</span>' : (it.reopen ? '<span class="stop">Re-open: ' + esc(it.reopen) + '</span>' : "")) +
+            '</button>';
+        }).join("") + '</div></div>';
+    }).join("");
+  }
+
+  function renderAll() {
+    renderToday(); renderLists(); renderDash(); renderCommitteeList(); renderCalibration(); renderBook();
+  }
+
+  /* ============================ events ============================ */
+
+  function switchTab(name) {
+    ["today", "lists", "dash", "committee", "calibration", "book", "method"].forEach(function (t) {
+      $("p-" + t).hidden = t !== name;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) {
+      b.setAttribute("aria-selected", String(b.dataset.tab === name));
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  document.addEventListener("change", function (e) {
+    var cb = e.target;
+    if (cb && cb.matches && cb.matches("[data-done]")) {
+      state.done[cb.dataset.done] = cb.checked;
+      localSave(); renderToday();
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!(e.target instanceof Element)) return;
+    var tab = e.target.closest(".tab");
+    if (tab) { switchTab(tab.dataset.tab); return; }
+    var go = e.target.closest("[data-go]");
+    if (go) { switchTab(go.dataset.go); return; }
+    if (e.target.id === "install-dismiss") {
+      try { localStorage.setItem("altovix.install", "1"); } catch (err) {}
+      renderToday(); return;
+    }
+
+    var runRow = e.target.closest("[data-run]");
+    if (runRow) {
+      var run = state.runs.filter(function (r) { return r.id === runRow.dataset.run; })[0];
+      if (run) {
+        currentRun = Object.assign({ errors: {}, outputs: {} }, run, { running: null });
+        var chainFor = AGENTS.filter(function (a) { return a.id in currentRun.outputs; });
+        $("run-panel").hidden = false;
+        $("run-title").textContent = run.symbol + " — " + (run.model || "committee");
+        $("run-sub").textContent = String(run.mandate || "").replace("_", " ").toLowerCase() + " · " + run.asOf +
+          " · " + (run.claimCount || 0) + " claims";
+        $("btn-savedecision").hidden = !currentRun.outputs.decision;
+        renderAgents(chainFor);
+        if ($("p-committee").hidden) { switchTab("committee"); }
+        setTimeout(function () { $("run-panel").scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+      }
+      return;
+    }
+    var toggle = e.target.closest("[data-toggle]");
+    if (toggle) {
+      var bd = toggle.parentElement.querySelector(".agent-bd");
+      if (bd) bd.classList.toggle("hide");
+      return;
+    }
+
+    var row = e.target.closest("[data-claim]");
+    if (row) {
+      var id = row.dataset.claim;
+      var claim = state.claims.filter(function (c) { return c.id === id; })[0];
+      if (!claim) return;
+      var settle = function (outcome, note) {
+        claim.status = outcome === null ? "VOID" : "RESOLVED";
+        claim.outcome = outcome;
+        claim.note = note || "";
+        claim.resolvedOn = today();
+        persist("claims", claim);
+        renderAll();
+      };
+      if (e.target.classList.contains("j-void")) return settle(null, "voided by operator");
+      if (e.target.classList.contains("j-true")) return settle(1, "graded by hand: it held");
+      if (e.target.classList.contains("j-false")) return settle(0, "graded by hand: it did not hold");
+      if (e.target.classList.contains("j-grade")) {
+        var sub = row.querySelector(".j-sub"), ben = row.querySelector(".j-bench"), dd = row.querySelector(".j-dd");
+        var sv = sub && sub.value !== "" ? Number(sub.value) / 100 : null;
+        var bv = ben && ben.value !== "" ? Number(ben.value) / 100 : null;
+        var dv = dd && dd.value !== "" ? Number(dd.value) / 100 : null;
+        var res = gradeClaim(claim, sv, bv, dv);
+        if (res === null) {
+          row.insertAdjacentHTML("beforeend",
+            '<span class="note" style="color:var(--neg);flex:1 1 100%">Needs the numbers this claim is measured against — ' +
+            (claim.kind === "DRAWDOWN_LIMIT" ? "the worst drawdown." : /RELATIVE|SECTOR|DECISION/.test(claim.kind) ? "both returns, since it is a relative claim." : "the return.") + "</span>");
+          return;
+        }
+        return settle(res, "return " + pctS(sv, 2) + (bv == null ? "" : ", SPY " + pctS(bv, 2)) + (dv == null ? "" : ", drawdown " + pctS(dv, 2)));
+      }
+    }
+  });
+
+  $("themebtn").addEventListener("click", function () {
+    var root = document.documentElement;
+    var cur = root.getAttribute("data-theme");
+    var next = cur === "dark" ? "light" : cur === "light" ? null : (matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+    if (next) root.setAttribute("data-theme", next); else root.removeAttribute("data-theme");
+    try { localStorage.setItem("altovix.theme", next || ""); } catch (err) {}
+  });
+
+  $("btn-run").addEventListener("click", runCommittee);
+  $("btn-cancel").addEventListener("click", function () { if (abortCtl) abortCtl.abort(); });
+
+  $("btn-savedecision").addEventListener("click", function () {
+    if (!currentRun || !currentRun.outputs.decision) return;
+    var d = currentRun.outputs.decision;
+    switchTab("book");
+    $("t-side").value = d.action === "SELL" || d.action === "TRIM" ? "SELL" : "BUY";
+    $("t-symbol").value = currentRun.symbol;
+    $("t-thesis").value = (currentRun.outputs.journal && currentRun.outputs.journal.thesisOneLine ? currentRun.outputs.journal.thesisOneLine + " — " : "") + "Exit: " + (d.exitRule || "");
+    $("t-date").value = today();
+    syncTradeForm();
+    $("t-shares").focus();
+    $("trade-status").textContent = "Pre-filled from run " + currentRun.symbol + " " + d.action + ". Enter the shares and the price you actually paid.";
+  });
+
+  function syncTradeForm() {
+    var side = $("t-side").value;
+    var isCash = side === "DEPOSIT" || side === "WITHDRAW";
+    $("f-symbol").hidden = isCash; $("f-shares").hidden = isCash; $("f-price").hidden = isCash;
+    $("f-amount").hidden = !isCash;
+  }
+  $("t-side").addEventListener("change", syncTradeForm);
+
+  $("btn-trade").addEventListener("click", function () {
+    var side = $("t-side").value, date = $("t-date").value || today();
+    var t = { id: uid(), side: side, date: date, thesis: $("t-thesis").value || "", ts: Date.now() };
+    if (side === "DEPOSIT" || side === "WITHDRAW") {
+      var amt = Number($("t-amount").value);
+      if (!isFinite(amt) || amt <= 0) { $("trade-status").textContent = "Enter an amount."; return; }
+      t.amount = amt;
+    } else {
+      t.symbol = ($("t-symbol").value || "").trim().toUpperCase();
+      t.shares = Number($("t-shares").value);
+      t.price = Number($("t-price").value);
+      if (!t.symbol || !isFinite(t.shares) || t.shares <= 0 || !isFinite(t.price) || t.price < 0) {
+        $("trade-status").textContent = "Needs a ticker, a positive share count and a price."; return;
+      }
+      var p = positions();
+      if (side === "BUY" && t.shares * t.price > p.cash + 1e-9) {
+        $("trade-status").textContent = "That costs " + money(t.shares * t.price) + " but only " + money(p.cash) + " is available. Record a deposit first.";
+        return;
+      }
+      if (side === "SELL") {
+        var held = (p.list.filter(function (x) { return x.symbol === t.symbol; })[0] || { shares: 0 }).shares;
+        if (t.shares > held + 1e-9) { $("trade-status").textContent = "Only " + held + " " + t.symbol + " open."; return; }
+      }
+      state.marks[t.symbol] = t.price;
+      persist("marks");
+    }
+    state.trades = [t].concat(state.trades);
+    persist("trades", t);
+    $("t-shares").value = ""; $("t-price").value = ""; $("t-amount").value = ""; $("t-thesis").value = "";
+    $("trade-status").textContent = "Recorded.";
+    renderAll();
+  });
+
+  $("btn-mark").addEventListener("click", function () {
+    var p = positions();
+    if (!p.list.length) { switchTab("book"); return; }
+    p.list.forEach(function (x) {
+      var v = window.prompt("Last price for " + x.symbol + (x.mark != null ? "  (currently " + money(x.mark) + ")" : ""), x.mark != null ? String(x.mark) : "");
+      if (v === null || v.trim() === "") return;
+      var n = Number(v);
+      if (isFinite(n) && n >= 0) state.marks[x.symbol] = n;
+    });
+    persist("marks");
+    renderAll();
+  });
+
+  /* ============================ init ============================ */
+
+  try {
+    var saved = localStorage.getItem("altovix.theme");
+    if (saved) document.documentElement.setAttribute("data-theme", saved);
+  } catch (e) {}
+
+  $("t-date").value = today();
+  syncTradeForm();
+  localLoad();
+  renderMethod();
+  renderBanner();
+  renderAll();
+  $("foot").innerHTML =
+    "Altovix Terminal — a personal, AI-assisted portfolio record. Every committee decision is stored whole, including the bad ones, " +
+    "because a calibration record only means something if nothing was deleted after the fact. " +
+    "This page holds no market feed: prices are the marks you enter. Nothing here is investment advice.";
+
+  connect();
+})();
+</script>

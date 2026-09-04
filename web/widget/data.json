@@ -1,0 +1,565 @@
+{
+  "generated": "2026-09-04",
+  "url": "https://jamesskeneco-dev.github.io/Altovix-app/",
+  "regime": {
+    "label": "NEUTRAL",
+    "conf": 0.58
+  },
+  "claimsDue": [
+    {
+      "d": "2026-09-18",
+      "n": 2
+    },
+    {
+      "d": "2026-10-03",
+      "n": 60
+    },
+    {
+      "d": "2026-11-02",
+      "n": 83
+    },
+    {
+      "d": "2026-12-01",
+      "n": 48
+    }
+  ],
+  "items": [
+    {
+      "s": "JPM",
+      "a": "BUY",
+      "list": "Blue chips",
+      "size": 9,
+      "conf": 0.57,
+      "stop": "close < $349, or HYG closes below its 21-day low",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 5,
+          "date": "2026-09-04",
+          "label": "Tranche 1",
+          "cond": null
+        },
+        {
+          "pct": 4,
+          "date": "2026-09-17",
+          "label": "After FOMC",
+          "cond": null
+        }
+      ]
+    },
+    {
+      "s": "MSFT",
+      "a": "BUY",
+      "list": "Blue chips",
+      "size": 6,
+      "conf": 0.55,
+      "stop": "close < $480",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 3,
+          "date": "2026-09-04",
+          "label": "Tranche 1",
+          "cond": null
+        },
+        {
+          "pct": 3,
+          "date": "2026-09-17",
+          "label": "After FOMC",
+          "cond": "or on a pullback toward $495, whichever comes first"
+        }
+      ]
+    },
+    {
+      "s": "XOM",
+      "a": "BUY",
+      "list": "Blue chips",
+      "size": 5,
+      "conf": 0.54,
+      "stop": "close < $152.50, or WTI closes below $80",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 5,
+          "date": "2026-09-04",
+          "label": "Full size",
+          "cond": null
+        }
+      ]
+    },
+    {
+      "s": "NVDA",
+      "a": "BUY",
+      "list": "Blue chips",
+      "size": 3,
+      "conf": 0.54,
+      "stop": "close < $209",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 1.5,
+          "date": "2026-09-04",
+          "label": "Tranche 1",
+          "cond": null
+        },
+        {
+          "pct": 1.5,
+          "date": "2026-09-17",
+          "label": "After FOMC",
+          "cond": "or on a close above $230.47 with volume > 1.2x average"
+        }
+      ]
+    },
+    {
+      "s": "GOOGL",
+      "a": "BUY",
+      "list": "Blue chips",
+      "size": 4,
+      "conf": 0.52,
+      "stop": "6% below entry (about $322)",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 2,
+          "date": "2026-09-04",
+          "label": "Tranche 1",
+          "cond": null
+        },
+        {
+          "pct": 2,
+          "date": null,
+          "label": "Second half",
+          "cond": "only on a daily close above the 50-day at $348.67"
+        }
+      ]
+    },
+    {
+      "s": "META",
+      "a": "BUY",
+      "list": "Blue chips",
+      "size": 4,
+      "conf": 0.53,
+      "stop": "close < $570",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 2,
+          "date": null,
+          "label": "First half",
+          "cond": "on a pullback to about $590, or a close back above $600 after one"
+        },
+        {
+          "pct": 2,
+          "date": null,
+          "label": "Second half",
+          "cond": "only after ten sessions holding above $594"
+        }
+      ]
+    },
+    {
+      "s": "AMZN",
+      "a": "AVOID",
+      "list": "Blue chips",
+      "size": 0,
+      "conf": 0.55,
+      "stop": null,
+      "reopen": "a close above $272 with volume > 1.2x average, or after late-October earnings",
+      "tr": []
+    },
+    {
+      "s": "LLY",
+      "a": "AVOID",
+      "list": "Blue chips",
+      "size": 0,
+      "conf": 0.52,
+      "stop": null,
+      "reopen": "a close above $1,191 (50-day) with volume > 1.2x average",
+      "tr": []
+    },
+    {
+      "s": "COST",
+      "a": "AVOID",
+      "list": "Blue chips",
+      "size": 0,
+      "conf": 0.57,
+      "stop": null,
+      "reopen": "after the Sep 24 print - a held gap-up, or a close above $944 on volume",
+      "tr": []
+    },
+    {
+      "s": "CAT",
+      "a": "AVOID",
+      "list": "Blue chips",
+      "size": 0,
+      "conf": 0.55,
+      "stop": null,
+      "reopen": "two consecutive closes above $842, or after October earnings",
+      "tr": []
+    },
+    {
+      "s": "NPK",
+      "a": "BUY",
+      "list": "Defense",
+      "size": 4,
+      "conf": 0.57,
+      "stop": "close < $133.59 (50-day)",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 2,
+          "date": "2026-09-04",
+          "label": "Tranche 1",
+          "cond": "limit orders only - 90K shares a day"
+        },
+        {
+          "pct": 2,
+          "date": "2026-09-17",
+          "label": "After FOMC",
+          "cond": "limit orders only"
+        }
+      ]
+    },
+    {
+      "s": "HII",
+      "a": "BUY",
+      "list": "Defense",
+      "size": 6,
+      "conf": 0.55,
+      "stop": "close < $278 (pre-gap level)",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 3,
+          "date": "2026-09-04",
+          "label": "Tranche 1",
+          "cond": null
+        },
+        {
+          "pct": 3,
+          "date": "2026-09-17",
+          "label": "After FOMC",
+          "cond": "or on a close back above the 50-day at $297.17, whichever first"
+        }
+      ]
+    },
+    {
+      "s": "RGR",
+      "a": "BUY",
+      "list": "Defense",
+      "size": 6,
+      "conf": 0.54,
+      "stop": "close < $35.50 (under the two-month box)",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 3,
+          "date": "2026-09-04",
+          "label": "Tranche 1",
+          "cond": null
+        },
+        {
+          "pct": 3,
+          "date": "2026-09-17",
+          "label": "After FOMC",
+          "cond": null
+        }
+      ]
+    },
+    {
+      "s": "BWXT",
+      "a": "BUY",
+      "list": "Defense",
+      "size": 3.5,
+      "conf": 0.54,
+      "stop": "close < $147",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 2,
+          "date": "2026-09-04",
+          "label": "On the double bottom",
+          "cond": null
+        },
+        {
+          "pct": 1.5,
+          "date": null,
+          "label": "After investor day",
+          "cond": "only if it closes above $172.07 within three sessions of Sep 29"
+        }
+      ]
+    },
+    {
+      "s": "CDRE",
+      "a": "BUY",
+      "list": "Defense",
+      "size": 3,
+      "conf": 0.53,
+      "stop": "close < $27.36",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 1.5,
+          "date": "2026-09-04",
+          "label": "Tranche 1",
+          "cond": null
+        },
+        {
+          "pct": 1.5,
+          "date": null,
+          "label": "Second half",
+          "cond": "only on a close above the 50-day at $30.84"
+        }
+      ]
+    },
+    {
+      "s": "KTOS",
+      "a": "BUY",
+      "list": "Defense",
+      "size": 2.5,
+      "conf": 0.51,
+      "stop": "close < $43.09 (52-week low)",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 2.5,
+          "date": null,
+          "label": "Conditional entry",
+          "cond": "only on a daily close above the 50-day at $52.30; review if untriggered in 15 sessions"
+        }
+      ]
+    },
+    {
+      "s": "RCAT",
+      "a": "BUY",
+      "list": "Defense",
+      "size": 1,
+      "conf": 0.5,
+      "stop": "close < $7.35",
+      "reopen": null,
+      "tr": [
+        {
+          "pct": 1,
+          "date": "2026-09-04",
+          "label": "Full 1% - never added to",
+          "cond": null
+        }
+      ]
+    },
+    {
+      "s": "AVAV",
+      "a": "AVOID",
+      "list": "Defense",
+      "size": 0,
+      "conf": 0.5,
+      "stop": null,
+      "reopen": "after the Sep 9 print, on a daily close above the 50-day at $158.80; a post-print close below $140.62 closes the file",
+      "tr": []
+    },
+    {
+      "s": "KRMN",
+      "a": "AVOID",
+      "list": "Defense",
+      "size": 0,
+      "conf": 0.5,
+      "stop": null,
+      "reopen": "after Sep 14, on the first higher low above $39.75; any CFO-related disclosure closes the file",
+      "tr": []
+    },
+    {
+      "s": "MRCY",
+      "a": "AVOID",
+      "list": "Defense",
+      "size": 0,
+      "conf": 0.55,
+      "stop": null,
+      "reopen": "a close above $92 with volume > 1.2x average - the first higher high since the print",
+      "tr": []
+    }
+  ],
+  "events": [
+    {
+      "d": "2026-09-04",
+      "k": "event",
+      "l": "August jobs report, 8:30 ET - tranche 1 after the print",
+      "syms": [],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-09-04",
+      "k": "tranche",
+      "l": "Tranche 1: NPK 2% (limit), HII 3%, RGR 3%, BWXT 2%, CDRE 1.5%, RCAT 1%",
+      "syms": [
+        "NPK",
+        "HII",
+        "RGR",
+        "BWXT",
+        "CDRE",
+        "RCAT"
+      ],
+      "list": "Defense"
+    },
+    {
+      "d": "2026-09-09",
+      "k": "event",
+      "l": "AeroVironment earnings - not held; watch for a close above $158.80 or below $140.62",
+      "syms": [
+        "AVAV"
+      ],
+      "list": "Defense"
+    },
+    {
+      "d": "2026-09-10",
+      "k": "event",
+      "l": "August CPI (approx.) - regime flips RISK_OFF if core is 0.4% m/m or higher",
+      "syms": [],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-09-14",
+      "k": "event",
+      "l": "Karman CFO handover - if clean, start watching for the first higher low above $39.75",
+      "syms": [
+        "KRMN"
+      ],
+      "list": "Defense"
+    },
+    {
+      "d": "2026-09-16",
+      "k": "event",
+      "l": "FOMC decision (assumed Sep 15-16 meeting - confirm). Second tranches the day after.",
+      "syms": [
+        "JPM",
+        "MSFT",
+        "NVDA"
+      ],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-09-18",
+      "k": "review",
+      "l": "First review",
+      "syms": [
+        "JPM",
+        "MSFT",
+        "XOM",
+        "NVDA",
+        "META"
+      ],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-09-18",
+      "k": "review",
+      "l": "Review",
+      "syms": [
+        "NPK",
+        "HII",
+        "BWXT"
+      ],
+      "list": "Defense"
+    },
+    {
+      "d": "2026-09-24",
+      "k": "event",
+      "l": "Costco earnings - not held; watch the reaction for three sessions",
+      "syms": [
+        "COST"
+      ],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-09-25",
+      "k": "review",
+      "l": "Second review",
+      "syms": [
+        "GOOGL",
+        "COST"
+      ],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-09-25",
+      "k": "review",
+      "l": "Review - did KTOS's 50-day trigger fire?",
+      "syms": [
+        "RGR",
+        "CDRE",
+        "KTOS"
+      ],
+      "list": "Defense"
+    },
+    {
+      "d": "2026-09-29",
+      "k": "event",
+      "l": "BWXT investor day - second tranche only on a close above $172.07 within three sessions",
+      "syms": [
+        "BWXT"
+      ],
+      "list": "Defense"
+    },
+    {
+      "d": "2026-10-01",
+      "k": "event",
+      "l": "FY2027 begins under a continuing resolution - new-start names (KTOS, AVAV, RCAT) feel this first",
+      "syms": [
+        "KTOS",
+        "AVAV",
+        "RCAT"
+      ],
+      "list": "Defense"
+    },
+    {
+      "d": "2026-10-02",
+      "k": "review",
+      "l": "Review",
+      "syms": [
+        "LLY"
+      ],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-10-02",
+      "k": "review",
+      "l": "Review",
+      "syms": [
+        "RCAT",
+        "MRCY"
+      ],
+      "list": "Defense"
+    },
+    {
+      "d": "2026-10-03",
+      "k": "calibration",
+      "l": "Calibration day - the 21-day claims come due. Grade them.",
+      "syms": [],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-10-13",
+      "k": "event",
+      "l": "JPMorgan earnings",
+      "syms": [
+        "JPM"
+      ],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-10-16",
+      "k": "review",
+      "l": "Review",
+      "syms": [
+        "CAT"
+      ],
+      "list": "Blue chips"
+    },
+    {
+      "d": "2026-10-30",
+      "k": "review",
+      "l": "Review after late-October earnings",
+      "syms": [
+        "AMZN"
+      ],
+      "list": "Blue chips"
+    }
+  ]
+}
