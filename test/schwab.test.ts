@@ -24,7 +24,8 @@ let dir: string;
 const EQUITY_QUOTE = {
   SPY: {
     assetMainType: "EQUITY", symbol: "SPY",
-    quote: { lastPrice: 651.23, closePrice: 648.1, netChange: 3.13, netPercentChange: 0.4829, bidPrice: 651.2, askPrice: 651.25, totalVolume: 41234567, tradeTime: 1788555600000, "52WeekHigh": 660, "52WeekLow": 480 },
+    quote: { lastPrice: 651.23, closePrice: 648.1, netChange: 3.13, netPercentChange: 0.4829, bidPrice: 651.2, askPrice: 651.25, totalVolume: 41234567, tradeTime: 1788555600000, "52WeekHigh": 660, "52WeekLow": 480, openPrice: 649, highPrice: 652.4, lowPrice: 647.9 },
+    fundamental: { peRatio: 27.4, eps: 23.77, divYield: 1.12, avg10DaysVolume: 52000000 },
     reference: { description: "SPDR S&P 500 ETF" },
   },
   $VIX: {
@@ -203,14 +204,17 @@ test("quotes: maps Schwab's shape, index tickers, and invalid symbols", async ()
   assert.equal(spy.netPct, 0.4829);
   assert.equal(spy.bid, 651.2);
   assert.equal(spy.description, "SPDR S&P 500 ETF");
+  assert.deepEqual([spy.open, spy.high, spy.low, spy.pe, spy.eps, spy.divYield, spy.avgVolume10d], [649, 652.4, 647.9, 27.4, 23.77, 1.12, 52000000]);
   const vix = rows[1];
   assert.ok(vix && !vix.invalid);
   assert.equal(vix.symbol, "^VIX");
   assert.equal(vix.last, 16.4);
   assert.equal(vix.bid, null);
+  assert.deepEqual([vix.open, vix.pe, vix.divYield], [null, null, null], "no figure is null, never 0");
   assert.equal(rows[2]?.invalid, true);
   const req = seen.at(-1);
   assert.ok(req?.path.includes("symbols=SPY%2C%24VIX%2CNOPE"), req?.path);
+  assert.ok(req?.path.includes("fundamental"), req?.path);
 });
 
 test("priceHistory: daily candles come back as sorted Bars with New York dates; from filters", async () => {

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import type { Bar } from "../src/core/types.ts";
 import {
-  completedBars, healthScore, parseAgentScores, parseRuleBook, runCheck, tickersFor, weekOf, type RuleBook, type TriggerRule,
+  buildCharts, completedBars, healthScore, parseAgentScores, parseRuleBook, runCheck, tickersFor, weekOf, type RuleBook, type TriggerRule,
 } from "../src/core/check/engine.ts";
 import { generateTopic, planAlerts, type CheckState } from "../src/core/check/notify.ts";
 
@@ -273,4 +273,54 @@ test("ntfy topic: typable, unguessable enough, never the same twice", () => {
   const a = generateTopic();
   assert.match(a, /^altovix-[a-z]+-[a-z]+-[a-z]+-\d{4}$/);
   assert.notEqual(a, generateTopic());
+});
+
+test("stock page: daily and weekly candles on shared calendars, short for a new listing, never today's unfinished bar", () => {
+  const long = series(flat(300, 10).map((v, i) => v + i), { opens: flat(300, 10).map((v, i) => v + i - 0.5), volume: flat(300, 100) }); // 300 sessions
+  const young = long.slice(-40).map((b) => ({ ...b, open: 5, high: 5, low: 5, close: 5 }));  // listed 40 sessions ago
+  const gap = long.slice(-10).filter((_, i) => i !== 4);                                       // one halted day
+  const thin = long.slice(-3).map((b) => ({ ...b, open: null, high: null, low: null, volume: null })); // a bar built from a quote
+  const today = (long.at(-1) as Bar).date;
+  const c = buildCharts({ SPY: long, NEW: young, HALT: gap, THIN: thin, NONE: [] }, today, false);
+  assert.equal(c.days.length, 130);
+  assert.equal(c.days.at(-1), (long.at(-2) as Bar).date, "today is unfinished - the chart ends yesterday");
+  const last = long.at(-2) as Bar;
+  assert.deepEqual(c.daily["SPY"]?.at(-1), [last.close - 0.5, last.close, last.close - 0.5, last.close, 100]);
+  assert.equal(c.daily["SPY"]?.length, 130);
+  assert.equal(c.daily["NEW"]?.length, 39);
+  assert.deepEqual(c.daily["HALT"]?.map((x) => x === null), [false, false, false, false, true, false, false, false, false]);
+  assert.deepEqual(c.daily["THIN"]?.at(-1), [last.close, last.close, last.close, last.close, 0], "no open/high/low: a flat candle, not a hole");
+  assert.equal(c.daily["NONE"], undefined);
+  // Weekly: five sessions roll into one candle named by its last session.
+  assert.equal(c.weeks.length, 53);
+  const wk = c.weekly["SPY"]?.at(-2) as [number, number, number, number, number];
+  const days = long.filter((b) => weekOf(b.date) === weekOf(c.weeks.at(-2) as string));
+  assert.equal(days.length, 5);
+  assert.deepEqual(wk, [(days[0] as Bar).close - 0.5, (days[4] as Bar).close, (days[0] as Bar).close - 0.5, (days[4] as Bar).close, 500]);
+  assert.equal(c.weeks.at(-2), (days[4] as Bar).date);
+  assert.equal(buildCharts({ SPY: long }, today, true).days.at(-1), today, "after the close today counts");
+});
+
+test("stock page: numbers under the chart come from completed bars, the feed fills the gaps, live rides along", () => {
+  const closes = [...flat(28, 100), 102, 105];
+  const bars = { HII: series(closes, { volume: flat(30, 2000) }), SPY: series(flat(30, 500)) };
+  const today = (bars.HII.at(-1) as Bar).date;
+  // After the close: today's bar is the last close.
+  const done = runCheck({ book: book(), bars, asOf: today, sessionComplete: true, facts: { HII: { high52: 140, low52: 80, pe: 18.5, divYield: 1.9, assetType: "EQUITY", open: 1, volume: 1 } } });
+  const s = done.stats["HII"];
+  assert.ok(s);
+  assert.deepEqual([s.close, s.prevClose, s.closeDate, s.live], [105, 102, today, null]);
+  assert.equal(s.dayPct, 2.94);
+  assert.equal(s.open, 105, "the bar's own open beats the feed's");
+  assert.equal(s.volume, 2000);
+  assert.equal(s.avgVolume, 2000);
+  assert.deepEqual([s.high52, s.low52, s.pe, s.eps, s.divYield], [140, 80, 18.5, null, 1.9]);
+  // During the session: the last close is yesterday's, the move is live vs that close.
+  const open = runCheck({ book: book(), bars, live: { HII: 103.02 }, asOf: today, sessionComplete: false });
+  const o = open.stats["HII"];
+  assert.ok(o);
+  assert.deepEqual([o.close, o.live, o.dayPct], [102, 103.02, 1]);
+  assert.equal(o.high52, null, "no feed and under 200 sessions of history: no 52-week range is claimed");
+  // Holdings carry what the page needs to show "your position".
+  assert.deepEqual([done.positions[0]?.shares, done.positions[0]?.fill, done.positions[0]?.fillDate], [10, 100, "2026-09-04"]);
 });

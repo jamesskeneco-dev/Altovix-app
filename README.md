@@ -82,7 +82,11 @@ quotes for every ticker in it and evaluates every rule:
 ### The phone app's live numbers
 
 The app (`index.html`, GitHub Pages) has four screens fed by the market check: **Home** (book value, Opportunity,
-every holding with its logo and the agents' score), **Needs you**, **Search** (every pick) and **Agents**. After each
+every holding with its logo and the agents' score), **Needs you**, **Search** (every pick) and **Agents**. Tapping a
+company anywhere opens its **stock page**: price, a candlestick chart (daily candles for 1W-6M and since you bought,
+weekly for 1Y; price scale, volume, crosshair, and the stop / buy levels as tagged lines; a button switches to a line),
+the plan, the agents' score and notes, your position, the day's numbers and its history - all from `status.json`
+(`stats`, and `charts` = 130 daily + 53 weekly candles per ticker) plus the committee runs stored in the app. After each
 check the PC publishes `status.json` to a side branch, **`status`**, through the GitHub API, and the app reads it from
 `raw.githubusercontent.com` (falling back to the copy of `status.json` that ships with the site). `main` is never
 written by the script. One-time: `altovix-publish-setup.cmd` asks for a GitHub key (classic token, `public_repo`) and

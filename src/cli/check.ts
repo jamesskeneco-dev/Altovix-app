@@ -9,7 +9,7 @@ import type { Bar } from "../core/types.ts";
 import {
   schwabConfig, isConfigured, readTokens, refreshExpiresAt, quotes, priceHistory, tradingDate, type SchwabQuote,
 } from "../core/market/schwab.ts";
-import { parseAgentScores, parseRuleBook, runCheck, tickersFor, type AgentScores, type CheckResult, type RuleBook } from "../core/check/engine.ts";
+import { parseAgentScores, parseRuleBook, runCheck, tickersFor, type AgentScores, type CheckResult, type QuoteFacts, type RuleBook } from "../core/check/engine.ts";
 import { ensureTopic, ntfyConfig, planAlerts, readState, sendAlert, summaryLine, writeState, type Alert } from "../core/check/notify.ts";
 import { detectRepo, publishStatus, readToken, saveToken, whoAmI } from "../core/check/publish.ts";
 import { parseArgs, bool, str, heading, c, die } from "./args.ts";
@@ -113,10 +113,16 @@ async function check(): Promise<void> {
     }
   }
 
-  const tickers = tickersFor(book);
+  // The rules' own tickers, plus every other name the phone can open a page for (sold lots, scored names).
+  const agents = loadAgents();
+  const tickers = [...new Set([...tickersFor(book), ...(book.closed ?? []).map((l) => l.ticker), ...Object.keys(agents?.scores ?? {})])];
   const from = new Date(`${book.cycle.start}T12:00:00Z`);
   from.setUTCDate(from.getUTCDate() - 75); // room for the 21-session leg and 20-day averages
-  const fromDate = from.toISOString().slice(0, 10);
+  // The phone's stock page draws up to a year of closes, so fetch at least that much. Rules are
+  // unaffected: they only ever read from the fill date / the plan's start onward.
+  const yearAgo = new Date(`${clock.date}T12:00:00Z`);
+  yearAgo.setUTCDate(yearAgo.getUTCDate() - 372);
+  const fromDate = (from < yearAgo ? from : yearAgo).toISOString().slice(0, 10);
 
   if (!quiet) process.stdout.write(c.dim(`Schwab: ${tickers.length} tickers... `));
   let qs: SchwabQuote[] = [];
@@ -137,7 +143,7 @@ async function check(): Promise<void> {
     // Just after the bell the daily history may not have today's bar yet - the regular-session
     // last IS the close. Only when the quote actually traded today (not on a holiday).
     if (sessionComplete && q && px !== null && q.tradeTime && tradingDate(q.tradeTime) === clock.date && !list.some((b) => b.date === clock.date)) {
-      list.push({ date: clock.date, open: null, high: null, low: null, close: px, volume: q.volume });
+      list.push({ date: clock.date, open: q.open, high: q.high, low: q.low, close: px, volume: q.volume });
     }
     bars[t] = list;
     live[t] = sessionComplete ? null : px;
@@ -145,7 +151,17 @@ async function check(): Promise<void> {
 
   const names: Record<string, string> = {};
   for (const q of qs) if (q.description) names[q.symbol] = q.description;
-  const result = runCheck({ book, agents: loadAgents(), names, bars, live, asOf: clock.date, sessionComplete });
+  const facts: Record<string, QuoteFacts> = {};
+  for (const q of qs) {
+    if (q.invalid) continue;
+    // open/high/low/volume describe the quote's own trading day - useless on a holiday or a weekend
+    const today = q.tradeTime !== null && tradingDate(q.tradeTime) === clock.date;
+    facts[q.symbol] = {
+      assetType: q.assetType, high52: q.high52, low52: q.low52, pe: q.pe, eps: q.eps, divYield: q.divYield, avgVolume: q.avgVolume10d,
+      ...(today ? { open: q.open, high: q.high, low: q.low, volume: q.volume } : {}),
+    };
+  }
+  const result = runCheck({ book, agents, names, facts, bars, live, asOf: clock.date, sessionComplete });
   const plan = planAlerts(result, state);
 
   let publishNote = "";
@@ -153,7 +169,10 @@ async function check(): Promise<void> {
   if (persist) {
     const path = resolve(process.cwd(), STATUS);
     mkdirSync(resolve(path, ".."), { recursive: true });
-    const json = JSON.stringify({ generatedAt: new Date().toISOString(), rulesUpdated: book.updated ?? null, ...result }, null, 2) + "\n";
+    // Readable JSON, except the chart candles: tens of thousands of numbers, one per line, would be most of the file.
+    const { charts, ...rest } = result;
+    const json = JSON.stringify({ generatedAt: new Date().toISOString(), rulesUpdated: book.updated ?? null, ...rest }, null, 2)
+      .replace(/\n\}$/, `,\n  "charts": ${JSON.stringify(charts)}\n}\n`);
     writeFileSync(path, json);
     // A copy at the repo root rides along with every ordinary push: the phone app falls back to it
     // when the live copy (the "status" branch) cannot be read.

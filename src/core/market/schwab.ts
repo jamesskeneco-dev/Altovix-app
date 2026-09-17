@@ -284,6 +284,15 @@ export interface SchwabQuote {
   tradeTime: number | null;
   high52: number | null;
   low52: number | null;
+  /** Today's regular-session open / high / low (null before the first trade). */
+  open: number | null;
+  high: number | null;
+  low: number | null;
+  /** From the "fundamental" block; null for ETFs, indexes and anything Schwab has no figure for. */
+  pe: number | null;
+  eps: number | null;
+  divYield: number | null;
+  avgVolume10d: number | null;
   description: string | null;
   invalid: boolean;
 }
@@ -294,18 +303,22 @@ interface RawQuoteEntry {
   invalidSymbols?: string[];
   quote?: Record<string, number | string | undefined>;
   regular?: Record<string, number | string | undefined>;
+  fundamental?: Record<string, number | string | undefined>;
   reference?: { description?: string };
 }
 
 const numOrNull = (v: unknown): number | null =>
   typeof v === "number" && Number.isFinite(v) ? v : null;
 
+/** Schwab sends 0 for "no figure" (no trade yet today, no earnings, no dividend) - that is not a number to show. */
+const positive = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null);
+
 export async function quotes(symbols: string[], cfg: SchwabConfig = schwabConfig()): Promise<SchwabQuote[]> {
   if (!symbols.length) return [];
   const wanted = symbols.map((s) => s.toUpperCase());
   const raw = await apiGet<Record<string, RawQuoteEntry>>(
     "/marketdata/v1/quotes",
-    { symbols: wanted.map(schwabSymbol).join(","), fields: "quote,reference,regular", indicative: false },
+    { symbols: wanted.map(schwabSymbol).join(","), fields: "quote,reference,regular,fundamental", indicative: false },
     cfg,
   );
   const out: SchwabQuote[] = [];
@@ -313,7 +326,7 @@ export async function quotes(symbols: string[], cfg: SchwabConfig = schwabConfig
     const key = schwabSymbol(sym);
     const e = raw[key] ?? raw[sym];
     if (!e || e.invalidSymbols?.length) {
-      out.push({ symbol: sym, assetType: null, last: null, regularLast: null, close: null, netChange: null, netPct: null, bid: null, ask: null, volume: null, tradeTime: null, high52: null, low52: null, description: null, invalid: true });
+      out.push({ symbol: sym, assetType: null, last: null, regularLast: null, close: null, netChange: null, netPct: null, bid: null, ask: null, volume: null, tradeTime: null, high52: null, low52: null, open: null, high: null, low: null, pe: null, eps: null, divYield: null, avgVolume10d: null, description: null, invalid: true });
       continue;
     }
     const q = e.quote ?? {};
@@ -331,6 +344,13 @@ export async function quotes(symbols: string[], cfg: SchwabConfig = schwabConfig
       tradeTime: numOrNull(q["tradeTime"]) ?? numOrNull(q["quoteTime"]),
       high52: numOrNull(q["52WeekHigh"]),
       low52: numOrNull(q["52WeekLow"]),
+      open: positive(q["openPrice"]),
+      high: positive(q["highPrice"]),
+      low: positive(q["lowPrice"]),
+      pe: positive(e.fundamental?.["peRatio"]),
+      eps: numOrNull(e.fundamental?.["eps"]),
+      divYield: positive(e.fundamental?.["divYield"]),
+      avgVolume10d: positive(e.fundamental?.["avg10DaysVolume"]),
       description: e.reference?.description ?? null,
       invalid: false,
     });

@@ -135,6 +135,40 @@ export function parseAgentScores(json: string): AgentScores {
   return { asOf: j.asOf, source: j.source, scores };
 }
 
+/** Per-ticker facts from the quote feed. Every field is optional - the stock page hides what is missing. */
+export interface QuoteFacts {
+  assetType?: string | null;
+  open?: number | null; high?: number | null; low?: number | null; volume?: number | null;
+  high52?: number | null; low52?: number | null;
+  pe?: number | null; eps?: number | null; divYield?: number | null; avgVolume?: number | null;
+}
+
+/** What the phone's stock page shows under the chart. Prices are completed closes unless `live` is set. */
+export interface TickerStats {
+  close: number | null; closeDate: string | null; prevClose: number | null;
+  /** Today's move: live vs the last close while the market is open, else last close vs the one before. */
+  dayPct: number | null;
+  live: number | null;
+  open: number | null; high: number | null; low: number | null; volume: number | null;
+  /** Mean volume of the last 20 completed sessions (falls back to the feed's own average). */
+  avgVolume: number | null;
+  high52: number | null; low52: number | null;
+  pe: number | null; eps: number | null; divYield: number | null;
+  assetType: string | null;
+}
+
+/** One candle: [open, high, low, close, volume]. */
+export type Candle = [number, number, number, number, number];
+/**
+ * Candles for the phone's chart. Two shared calendars - the last ~130 sessions (`days`) and the last ~53
+ * weeks (`weeks`, each named by its last session) - and per ticker a row of candles aligned to the END
+ * of its calendar: a short row is a recent listing, a null is a day the ticker did not trade.
+ */
+export interface Charts {
+  days: string[]; daily: Record<string, Array<Candle | null>>;
+  weeks: string[]; weekly: Record<string, Array<Candle | null>>;
+}
+
 export interface CheckInput {
   /** Optional: the agents' scores, attached to every holding and trade so the phone can show them. */
   agents?: AgentScores;
@@ -143,6 +177,8 @@ export interface CheckInput {
   book: RuleBook;
   /** Daily bars per ticker, oldest first. May include today's (possibly unfinished) bar. */
   bars: Record<string, Bar[]>;
+  /** Optional: what the quote feed knows about each ticker (day range, 52-week range, P/E...), for the phone's stock page. */
+  facts?: Record<string, QuoteFacts>;
   /** Live price per ticker (regular-session last where available). Optional. */
   live?: Record<string, number | null | undefined>;
   /** Today's New York trading date, YYYY-MM-DD. */
@@ -174,6 +210,9 @@ export type Light = "GREEN" | "YELLOW" | "RED";
 
 export interface PositionStatus {
   ticker: string;
+  shares: number;
+  fill: number;
+  fillDate: string;
   light: Light;
   /** 0-100, price-based only: cushion to the stop, trend, short momentum. Not the 8-factor Altovix Score. */
   health: number | null;
@@ -226,6 +265,10 @@ export interface CheckResult {
   /** Every name the agents have scored, held or not - the phone's "all picks" list. */
   agentScores: Record<string, AgentScore>;
   names: Record<string, string>;
+  /** Per-ticker numbers for the phone's stock page. */
+  stats: Record<string, TickerStats>;
+  /** Daily and weekly candles per ticker, for the stock page's chart. */
+  charts: Charts;
 }
 
 // ---------------------------------------------------------------------------
@@ -374,7 +417,7 @@ function evaluatePosition(p: PositionRule, input: CheckInput, events: CheckEvent
   const light: Light = exit ? "RED" : cushionPct !== null && cushionPct <= book.nearStopPct ? "YELLOW" : last ? "GREEN" : "YELLOW";
   if (!last) notes.push("No price data.");
   return {
-    ticker: p.ticker, light,
+    ticker: p.ticker, shares: p.shares, fill: p.fill, fillDate: p.fillDate, light,
     health: exit ? 0 : healthScore(closes, p.stop),
     lastClose: last?.close ?? null, lastCloseDate: last?.date ?? null, live: typeof live === "number" ? live : null,
     stop: p.stop, cushionPct,
@@ -547,7 +590,86 @@ export function runCheck(input: CheckInput): CheckResult {
     agentsAsOf: input.agents?.asOf ?? null,
     agentScores: input.agents?.scores ?? {},
     names: input.names ?? {},
+    stats: buildStats(input),
+    charts: buildCharts(input.bars, asOf, sessionComplete),
   };
+}
+
+const round2 = (v: number | null): number | null => (v === null ? null : r2(v));
+const finite = (v: number | null | undefined): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+
+/** The numbers under the chart. Completed closes only; the live price rides along separately. */
+export function buildStats(input: CheckInput): Record<string, TickerStats> {
+  const out: Record<string, TickerStats> = {};
+  for (const ticker of Object.keys(input.bars)) {
+    const closes = completedBars(input.bars[ticker], input.asOf, input.sessionComplete);
+    const last = closes.at(-1) ?? null;
+    const prev = closes.at(-2) ?? null;
+    if (!last) continue;
+    const f = input.facts?.[ticker] ?? {};
+    const live = finite(input.live?.[ticker]);
+    // While the market is open the feed's open/high/low/volume describe TODAY; after the close they
+    // describe the last bar. The last bar's own numbers win when it has them.
+    const today = input.bars[ticker]?.find((b) => b.date === input.asOf) ?? null;
+    const dayBar = live !== null ? today : last;
+    const year = closes.slice(-252);
+    const highs = year.map((b) => b.high ?? b.close);
+    const lows = year.map((b) => b.low ?? b.close);
+    const vols = closes.slice(-20).map((b) => b.volume).filter((v): v is number => typeof v === "number" && v > 0);
+    const enoughForRange = year.length >= 200;
+    out[ticker] = {
+      close: last.close, closeDate: last.date, prevClose: prev?.close ?? null,
+      dayPct: live !== null ? r2(pct(live, last.close)) : prev ? r2(pct(last.close, prev.close)) : null,
+      live,
+      open: finite(dayBar?.open) ?? finite(f.open),
+      high: finite(dayBar?.high) ?? finite(f.high),
+      low: finite(dayBar?.low) ?? finite(f.low),
+      volume: finite(dayBar?.volume) ?? finite(f.volume),
+      avgVolume: vols.length >= 10 ? Math.round(vols.reduce((s, v) => s + v, 0) / vols.length) : finite(f.avgVolume),
+      high52: round2(finite(f.high52) ?? (enoughForRange ? Math.max(...highs) : null)),
+      low52: round2(finite(f.low52) ?? (enoughForRange ? Math.min(...lows) : null)),
+      pe: finite(f.pe), eps: finite(f.eps), divYield: finite(f.divYield),
+      assetType: f.assetType ?? null,
+    };
+  }
+  return out;
+}
+
+/** Daily candles for the last `maxDays` sessions and weekly candles for the last `maxWeeks` weeks. Completed bars only. */
+export function buildCharts(bars: Record<string, Bar[]>, asOf: string, sessionComplete: boolean, maxDays = 130, maxWeeks = 53): Charts {
+  const candle = (b: Bar): Candle => {
+    const o = b.open ?? b.close;
+    return [r2(o), r2(Math.max(b.high ?? b.close, o, b.close)), r2(Math.min(b.low ?? b.close, o, b.close)), r2(b.close), Math.round(b.volume ?? 0)];
+  };
+  const dailyBy = new Map<string, Map<string, Candle>>();
+  const weeklyBy = new Map<string, Map<string, Candle>>();
+  const allDays = new Set<string>();
+  const weekEnd = new Map<string, string>(); // week -> its last session, across every ticker
+  for (const [ticker, list] of Object.entries(bars)) {
+    const d = new Map<string, Candle>();
+    const w = new Map<string, Candle>();
+    for (const b of completedBars(list, asOf, sessionComplete)) {
+      const c = candle(b);
+      d.set(b.date, c); allDays.add(b.date);
+      const wk = weekOf(b.date);
+      if ((weekEnd.get(wk) ?? "") < b.date) weekEnd.set(wk, b.date);
+      const cur = w.get(wk);
+      w.set(wk, cur ? [cur[0], Math.max(cur[1], c[1]), Math.min(cur[2], c[2]), c[3], cur[4] + c[4]] : [...c] as Candle);
+    }
+    if (d.size) { dailyBy.set(ticker, d); weeklyBy.set(ticker, w); }
+  }
+  const align = <K>(keys: K[], by: Map<string, Map<K, Candle>>): Record<string, Array<Candle | null>> => {
+    const out: Record<string, Array<Candle | null>> = {};
+    for (const [ticker, m] of by) {
+      const row = keys.map((k) => m.get(k) ?? null);
+      const first = row.findIndex((v) => v !== null);
+      if (first !== -1) out[ticker] = row.slice(first);
+    }
+    return out;
+  };
+  const days = [...allDays].sort().slice(-maxDays);
+  const weekKeys = [...weekEnd.keys()].sort().slice(-maxWeeks);
+  return { days, daily: align(days, dailyBy), weeks: weekKeys.map((k) => weekEnd.get(k) as string), weekly: align(weekKeys, weeklyBy) };
 }
 
 /** A fired buy keeps the Opportunity score up for five calendar days, then drops out. */
