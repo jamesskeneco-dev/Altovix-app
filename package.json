@@ -15,6 +15,7 @@
     "committee": "node --experimental-strip-types src/cli/committee.ts",
     "calibrate": "node --experimental-strip-types src/cli/calibrate.ts",
     "report": "node --experimental-strip-types src/cli/report.ts",
+    "schwab": "node --experimental-strip-types src/cli/schwab.ts",
     "build:widget": "node web/widget/build-widget.mjs web/altovix-widget.scriptable.js",
     "test": "node --experimental-strip-types --test test/*.test.ts"
   },

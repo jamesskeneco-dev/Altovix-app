@@ -62,6 +62,25 @@ machinery, not to say anything about markets.
 Add `--mock` to any committee run for a free offline dry run. Mock runs are stored like any
 other but are excluded from every scorecard.
 
+### Schwab market data (optional)
+
+With a [Schwab Trader API](https://developer.schwab.com) app (callback `https://127.0.0.1:8182`,
+products *Accounts and Trading* + *Market Data*), the terminal gets real quotes, full daily
+history and a read-only view of the linked account. Put the App Key and Secret in `.env`
+(`SCHWAB_APP_KEY`, `SCHWAB_APP_SECRET`) — nowhere else — then:
+
+| Command | What it does |
+|---|---|
+| `npm run schwab -- login` | Sign-in (or double-click `schwab-login.cmd`): opens its own Edge/Chrome window (separate profile under `%LOCALAPPDATA%\Altovix`, local debug port) and reads the redirect from the tab itself, so there is nothing to copy - just log in and consent. Schwab's code lasts ~30 s; a rejected one re-opens the page. `--manual` (or no Edge/Chrome found, or the window closed early) falls back to your normal browser: copy the "can't reach this page" address (clipboard is watched) or paste it into the terminal. Tokens cache in `data/schwab-tokens.json` (git-ignored); the refresh token lasts 7 days, then log in again |
+| `npm run schwab -- status` | Keys present, logged in, time left on the tokens, and a live SPY check |
+| `npm run schwab -- quote SPY QQQ ^VIX` | Live quotes |
+| `npm run schwab -- history DCO --from 2026-01-01 --ingest` | Daily bars, optionally written straight into `prices` |
+| `npm run schwab -- accounts` | Balances and positions of the linked account, numbers masked. Read-only |
+
+Set `ALTOVIX_MARKET_PROVIDER=schwab` to make it the first provider `npm run ingest` tries;
+Stooq → Yahoo → CSV remain the fallbacks. Nothing in this repo can place, replace or cancel
+an order — the client does not implement those endpoints.
+
 **Operator notes.** Anything not in the price tables - a macro snapshot, a dated headline, an
 earnings date - goes in `data/session/notes/market.md` (all symbols) or `notes/<SYMBOL>.md`, and
 is rendered into every agent's prompt as operator-supplied context the agents may use but not
@@ -101,7 +120,7 @@ fact, so the integrity boundary is at *scoring* time, not at write time.
 ```
 db/schema.sql            the whole data model, commented
 src/core/indicators/     pure maths - the only place numbers are computed
-src/core/market/         provider interface + Stooq, Yahoo and CSV adapters
+src/core/market/         provider interface + Schwab (OAuth, quotes, history, read-only accounts), Stooq, Yahoo and CSV adapters
 src/core/portfolio/      tax lots, wash sales, snapshots, performance metrics
 src/core/llm/            fetch-based Anthropic client, JSON-schema validator, offline mock
 src/core/agents/         one file per committee role: prompt, schema, claims

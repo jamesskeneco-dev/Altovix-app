@@ -5,12 +5,14 @@ import { resolve } from "node:path";
 function loadDotEnv(file = ".env"): void {
   const path = resolve(process.cwd(), file);
   if (!existsSync(path)) return;
-  for (const line of readFileSync(path, "utf8").split("\n")) {
+  // Windows Notepad may write a UTF-8 byte-order mark; strip it or the first key is unreadable.
+  const text = readFileSync(path, "utf8").replace(/^﻿/, "");
+  for (const line of text.split("\n")) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
     const eq = trimmed.indexOf("=");
     if (eq === -1) continue;
-    const key = trimmed.slice(0, eq).trim();
+    const key = trimmed.slice(0, eq).trim().replace(/^export\s+/, "");
     let value = trimmed.slice(eq + 1).trim();
     if (
       (value.startsWith('"') && value.endsWith('"')) ||
@@ -30,7 +32,7 @@ export const config = {
   llmMode: env("ALTOVIX_LLM", "mock") as "real" | "mock",
   apiKey: process.env["ANTHROPIC_API_KEY"] ?? "",
   model: env("ALTOVIX_MODEL", "claude-sonnet-4-6"),
-  marketProvider: env("ALTOVIX_MARKET_PROVIDER", "stooq") as "stooq" | "yahoo" | "csv",
+  marketProvider: env("ALTOVIX_MARKET_PROVIDER", "stooq") as "schwab" | "stooq" | "yahoo" | "csv",
   csvDir: env("ALTOVIX_CSV_DIR", "./data/prices"),
   benchmarks: env("ALTOVIX_BENCHMARKS", "SPY,QQQ")
     .split(",")

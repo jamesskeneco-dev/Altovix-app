@@ -6,11 +6,13 @@ import type { PriceProvider } from "./types.ts";
 import { stooq } from "./stooq.ts";
 import { yahoo } from "./yahoo.ts";
 import { csvProvider } from "./csv.ts";
+import { schwab } from "./schwab.ts";
 
-export { stooq, yahoo, csvProvider };
+export { stooq, yahoo, csvProvider, schwab };
 export type { PriceProvider };
 
 const PROVIDERS: Record<string, PriceProvider> = {
+  schwab,
   stooq,
   yahoo,
   csv: csvProvider,
