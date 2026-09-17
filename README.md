@@ -62,6 +62,23 @@ machinery, not to say anything about markets.
 Add `--mock` to any committee run for a free offline dry run. Mock runs are stored like any
 other but are excluded from every scorecard.
 
+### The market check (stops, buy triggers, phone alerts)
+
+`rules/book.json` is the plan in machine form: held lots with their stops, conditional adds/entries, re-open
+rules and the calendar. `npm run check` (or double-click `altovix-check.cmd`) pulls Schwab daily bars and live
+quotes for every ticker in it and evaluates every rule:
+
+- Rules fire on a **completed daily close** only. During the session a live price through a level is a
+  *heads-up*, never a signal.
+- Every run re-reads the whole history since the fill, so a missed run (PC off, login expired) loses nothing -
+  the next run reports what fired while it was away, dated, with the paper exit at the next session's open.
+- Output: a green / yellow / red light and a price-based health score per holding, an **Opportunity score**
+  (0-100: how close the book is to a buy), `data/status.json` for the app, and phone alerts through
+  [ntfy](https://ntfy.sh) - one per new trade signal (a flood is bundled), one summary per close, and a
+  warning before the 7-day Schwab login expires. Alerts already sent are remembered in `data/check-state.json`.
+- `altovix-setup.cmd` (once): creates the private ntfy topic (kept in `data/`, never in the repo), sends a test
+  alert, and registers three Windows scheduled runs on weekdays - 10:00, 13:00 and 16:15 New York time.
+
 ### Schwab market data (optional)
 
 With a [Schwab Trader API](https://developer.schwab.com) app (callback `https://127.0.0.1:8182`,

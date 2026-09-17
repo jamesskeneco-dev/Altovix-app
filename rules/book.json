@@ -1,0 +1,283 @@
+{
+  "version": 1,
+  "updated": "2026-09-17 (after the first Schwab check: JPM, BWXT, CDRE, RCAT closed; HII stop hit 09-17, exit due at the 09-18 open)",
+  "source": "claude/altovix-state.md (Claude project) - when the plan changes, this file changes",
+  "cycle": {
+    "name": "Cycle one",
+    "start": "2026-09-04",
+    "end": "2026-10-03",
+    "notional": 10000,
+    "cash": 7858.51,
+    "paper": true
+  },
+  "nearStopPct": 3,
+  "context": [
+    "SPY",
+    "ITA",
+    "HYG"
+  ],
+  "positions": [
+    {
+      "ticker": "XOM",
+      "shares": 3.1153,
+      "fill": 160.5,
+      "fillDate": "2026-09-04",
+      "stop": 152.5,
+      "sleeve": "bluechip",
+      "notes": [
+        "The WTI < $80 leg of this stop is NOT checked automatically."
+      ]
+    },
+    {
+      "ticker": "MSFT",
+      "shares": 0.5992,
+      "fill": 500.64,
+      "fillDate": "2026-09-04",
+      "stop": 480.0,
+      "sleeve": "bluechip"
+    },
+    {
+      "ticker": "HII",
+      "shares": 1.0485,
+      "fill": 286.13,
+      "fillDate": "2026-09-04",
+      "stop": 278.0,
+      "sleeve": "defense"
+    },
+    {
+      "ticker": "RGR",
+      "shares": 7.7379,
+      "fill": 38.77,
+      "fillDate": "2026-09-04",
+      "stop": 35.5,
+      "sleeve": "defense"
+    },
+    {
+      "ticker": "GOOGL",
+      "shares": 0.5905,
+      "fill": 338.71,
+      "fillDate": "2026-09-04",
+      "stop": 322.0,
+      "sleeve": "bluechip"
+    },
+    {
+      "ticker": "NPK",
+      "shares": 1.3712,
+      "fill": 145.86,
+      "fillDate": "2026-09-04",
+      "stop": 133.59,
+      "sleeve": "defense"
+    },
+    {
+      "ticker": "NVDA",
+      "shares": 0.6481,
+      "fill": 231.45,
+      "fillDate": "2026-09-04",
+      "stop": 209.0,
+      "sleeve": "bluechip"
+    },
+    {
+      "ticker": "DCO",
+      "shares": 0.8919,
+      "fill": 168.18,
+      "fillDate": "2026-09-04",
+      "stop": 150.0,
+      "sleeve": "defense"
+    }
+  ],
+  "closed": [
+    {
+      "ticker": "JPM",
+      "shares": 1.3943,
+      "fill": 358.6,
+      "fillDate": "2026-09-04",
+      "signalDate": "2026-09-09",
+      "exitDate": "2026-09-11",
+      "exitPrice": 358.32,
+      "reason": "Credit leg: HYG closed 78.98, under its prior 21-session low 79.10. Executed a session late (the 09-09 automated check failed) - recorded that way."
+    },
+    {
+      "ticker": "BWXT",
+      "shares": 1.2629,
+      "fill": 158.37,
+      "fillDate": "2026-09-04",
+      "signalDate": "2026-09-15",
+      "exitDate": "2026-09-16",
+      "exitPrice": 146.57,
+      "reason": "Stop: closed 146.70 < 147.00."
+    },
+    {
+      "ticker": "CDRE",
+      "shares": 5.0968,
+      "fill": 29.43,
+      "fillDate": "2026-09-04",
+      "signalDate": "2026-09-16",
+      "exitDate": "2026-09-17",
+      "exitPrice": 26.72,
+      "reason": "Stop: closed 26.42 < 27.36."
+    },
+    {
+      "ticker": "RCAT",
+      "shares": 11.8483,
+      "fill": 8.44,
+      "fillDate": "2026-09-04",
+      "signalDate": "2026-09-16",
+      "exitDate": "2026-09-17",
+      "exitPrice": 7.395,
+      "reason": "Stop: closed 7.10 < 7.35."
+    }
+  ],
+  "triggers": [
+    {
+      "id": "cdre-add",
+      "ticker": "CDRE",
+      "kind": "ADD",
+      "size": "1.5%",
+      "closeAbove": 30.84,
+      "note": "Subject to the 15% defense cap."
+    },
+    {
+      "id": "ktos-enter",
+      "ticker": "KTOS",
+      "kind": "ENTER",
+      "size": "2.5%",
+      "closeAbove": 52.3,
+      "stopIfFilled": 43.09,
+      "reviewIfUntriggeredBy": "2026-09-25",
+      "note": "Subject to the 15% defense cap."
+    },
+    {
+      "id": "hii-early-add",
+      "ticker": "HII",
+      "kind": "ADD",
+      "size": "3%",
+      "closeAbove": 297.17,
+      "note": "Early second tranche. Subject to the 15% defense cap."
+    },
+    {
+      "id": "dco-add",
+      "ticker": "DCO",
+      "kind": "ADD",
+      "size": "1.5%",
+      "closeAbove": 176.0,
+      "notBefore": "2026-09-17",
+      "voidIfCloseBelow": 160.0,
+      "voidOn": "2026-09-17",
+      "note": "No add if the 09-17 Investor Day gaps it below 160."
+    },
+    {
+      "id": "bwxt-add",
+      "ticker": "BWXT",
+      "kind": "ADD",
+      "size": "1.5%",
+      "closeAbove": 172.07,
+      "notBefore": "2026-09-29",
+      "notAfter": "2026-10-02",
+      "note": "Only within three sessions after the 09-29 investor day."
+    },
+    {
+      "id": "avav-reopen",
+      "ticker": "AVAV",
+      "kind": "REOPEN",
+      "closeAbove": 158.8,
+      "notBefore": "2026-09-10",
+      "closeFileBelow": 140.62,
+      "note": "Re-open = candidate for a committee run, not a buy."
+    },
+    {
+      "id": "powl-reopen",
+      "ticker": "POWL",
+      "kind": "REOPEN",
+      "closeAbove": 200.0,
+      "note": "Run the committee (no run exists yet). Review 09-25."
+    },
+    {
+      "id": "amzn-reopen",
+      "ticker": "AMZN",
+      "kind": "REOPEN",
+      "closeAbove": 272.0,
+      "volumeRatio": 1.2
+    },
+    {
+      "id": "lly-reopen",
+      "ticker": "LLY",
+      "kind": "REOPEN",
+      "closeAbove": 1191.0,
+      "volumeRatio": 1.2
+    },
+    {
+      "id": "cost-reopen",
+      "ticker": "COST",
+      "kind": "REOPEN",
+      "closeAbove": 944.0,
+      "volumeRatio": 1.2,
+      "notBefore": "2026-09-25",
+      "note": "Live only after the 09-24 earnings."
+    },
+    {
+      "id": "cat-reopen",
+      "ticker": "CAT",
+      "kind": "REOPEN",
+      "closeAbove": 842.0,
+      "consecutive": 2
+    },
+    {
+      "id": "mrcy-reopen",
+      "ticker": "MRCY",
+      "kind": "REOPEN",
+      "closeAbove": 92.0,
+      "volumeRatio": 1.2
+    },
+    {
+      "id": "krmn-reopen",
+      "ticker": "KRMN",
+      "kind": "REOPEN",
+      "manual": true,
+      "notBefore": "2026-09-15",
+      "note": "First higher low above 39.75 - needs eyes on the chart; the script only shows the price."
+    }
+  ],
+  "calendar": [
+    {
+      "date": "2026-09-17",
+      "text": "DCO Investor Day (VISION 2027). Dated defense second tranches (NPK 2% limit orders, HII 3%, RGR 3%) - subject to the 15% defense cap: operator decision, not automatic buys. Blue-chip tranches on this date are CANCELLED."
+    },
+    {
+      "date": "2026-09-18",
+      "text": "Review day: JPM MSFT XOM NVDA (stops or hold); NPK HII BWXT; resolve the defense cap."
+    },
+    {
+      "date": "2026-09-22",
+      "text": "DCO review."
+    },
+    {
+      "date": "2026-09-24",
+      "text": "COST earnings (COST re-open rule goes live after)."
+    },
+    {
+      "date": "2026-09-25",
+      "text": "Review day: GOOGL, COST; RGR CDRE KTOS; POWL."
+    },
+    {
+      "date": "2026-09-29",
+      "text": "BWXT investor day (BWXT add window opens: three sessions)."
+    },
+    {
+      "date": "2026-10-01",
+      "text": "FY2027 begins under a continuing resolution (new starts frozen)."
+    },
+    {
+      "date": "2026-10-02",
+      "text": "Review day: LLY; RCAT MRCY. Last close of cycle one - list each held name's Sep 4 -> Oct 2 return vs SPY."
+    },
+    {
+      "date": "2026-10-03",
+      "text": "CALIBRATION DAY: 60 claims due."
+    }
+  ],
+  "standingNotes": [
+    "Blue-chip adds are FROZEN (operator override 2026-09-04). Held blue-chip lots run to their stops or the 09-18 review.",
+    "Defense sleeve cap: 15% of the Book until ITA closes back above its 50-day. Unresolved - the 09-18 review must resolve it.",
+    "Every rule fires on a DAILY CLOSE. Intraday readings are a heads-up only."
+  ]
+}

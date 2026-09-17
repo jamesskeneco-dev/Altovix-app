@@ -1,0 +1,114 @@
+/* ---------- Pulse: the daily read (fed by the PC market check) ----------
+   Clean and simple: one deep-navy ground, soft rounded cards with no borders, one accent,
+   big numbers, plain list rows, a floating pill tab bar. Pulse is always dark. */
+#p-pulse{
+  --pz-ground:#070812; --pz-card:#11131F; --pz-card-2:#171A2A; --pz-line:rgba(255,255,255,.07);
+  --pz-ink:#FFFFFF; --pz-ink-2:#B9BDD0; --pz-mute:#7C819A; --pz-faint:#555A73;
+  --pz-accent:#5468FF; --pz-accent-soft:rgba(84,104,255,.16);
+  --pz-up:#3DDC84; --pz-down:#FF5C6C; --pz-warn:#FFB938;
+  max-width:560px; margin:0 auto; padding:6px 4px 0; color:var(--pz-ink);
+  font-family:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+body.pulse-on{background:#070812}
+body.pulse-on .masthead{background:#070812; border-bottom-color:transparent}
+body.pulse-on .masthead .strip, body.pulse-on .masthead .cmd, body.pulse-on .tape-date{display:none}
+body.pulse-on .brand{color:#fff}
+body.pulse-on #foot{display:none}
+body.pulse-on .masthead, body.pulse-on .masthead-in, body.pulse-on .tape{border-color:transparent !important; box-shadow:none}
+body.pulse-on .brandbtns .themebtn{border:none !important; outline:none; background:#11131F; color:#B9BDD0; border-radius:50%; width:40px; height:40px; padding:0; display:inline-flex; align-items:center; justify-content:center}
+body.pulse-on .brandbtns .themebtn .lbl{display:none}
+body.pulse-on .brandbtns{margin-left:auto; display:flex; gap:8px}
+@media (min-width:721px){ body.pulse-on .tabs{border-bottom:1px solid rgba(255,255,255,.07)} body.pulse-on .tab{color:#7C819A} body.pulse-on .tab[aria-selected="true"]{color:#fff; border-bottom-color:#5468FF} }
+
+/* floating pill tab bar on phones (all tabs, so the app feels like one thing) */
+@media (max-width:720px){
+  .tabs{left:16px; right:16px; bottom:calc(12px + env(safe-area-inset-bottom)); grid-template-columns:repeat(6,1fr); padding:7px;
+    border-radius:30px; border:1px solid rgba(255,255,255,.09); background:rgba(17,19,31,.86);
+    -webkit-backdrop-filter:blur(18px) saturate(1.4); backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 12px 32px -8px rgba(0,0,0,.6)}
+  .tab{font-size:0; letter-spacing:0; padding:9px 0; border-radius:22px; color:#8A8FA8; position:relative}
+  .tab .ico{width:24px; height:24px}
+  .tab[aria-selected="true"]{background:rgba(255,255,255,.10); color:#fff}
+  .tab .count{font-size:9px; position:absolute; top:3px; right:8px; transform:none}
+  .tab .dot{position:absolute; top:6px; right:14px; transform:none}
+  .wrap{padding-bottom:120px}
+}
+
+.pz-head{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:10px 12px 4px}
+.pz-k{font-size:13px; font-weight:500; color:var(--pz-mute); margin:0 0 2px}
+.pz-total{font-size:44px; font-weight:700; letter-spacing:-.025em; line-height:1.05; margin:0}
+.pz-total small{font-size:44px; font-weight:700; color:var(--pz-faint)}
+.pz-delta{font-size:15px; font-weight:600; margin:6px 0 0; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.pz-delta .mute{color:var(--pz-mute); font-weight:500}
+.up{color:var(--pz-up)} .down{color:var(--pz-down)}
+.pz-score{flex:none; text-align:center; background:none; border:none; padding:0; color:inherit; cursor:pointer; font:inherit}
+.pz-ring{position:relative; width:92px; height:92px}
+.pz-ring svg{width:100%; height:100%; transform:rotate(-90deg)}
+.pz-ring .trk{fill:none; stroke:var(--pz-card-2); stroke-width:8}
+.pz-ring .arc{fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1)}
+.pz-ring b{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:700; letter-spacing:-.02em}
+.pz-score span{display:block; font-size:12px; font-weight:600; color:var(--pz-mute); margin-top:6px}
+
+.pz-banner{margin:18px 8px 0; padding:16px 18px; border-radius:20px; background:linear-gradient(135deg,#1B2350,#151A36); display:flex; justify-content:space-between; align-items:center; gap:14px}
+.pz-banner h2{font-size:19px; font-weight:600; margin:0 0 3px; letter-spacing:-.01em; color:#fff}
+.pz-banner p{font-size:13.5px; line-height:1.4; color:#AEB6E6; margin:0}
+.pz-banner .pz-dot{width:12px; height:12px; border-radius:50%; flex:none}
+.pz-stale{margin:12px 8px 0; padding:12px 16px; border-radius:16px; background:rgba(255,185,56,.12); color:#FFD58A; font-size:13px; line-height:1.4}
+
+.pz-h{display:flex; align-items:center; gap:8px; font-size:18px; font-weight:600; margin:26px 12px 12px; letter-spacing:-.01em}
+.pz-h small{font-size:13px; font-weight:500; color:var(--pz-mute); margin-left:auto}
+.pz-rail{display:flex; align-items:flex-start; gap:10px; overflow-x:auto; padding:0 8px 4px; scroll-snap-type:x mandatory; scrollbar-width:none}
+.pz-rail::-webkit-scrollbar{display:none}
+.pz-sig{flex:none; width:78%; max-width:330px; scroll-snap-align:start; background:var(--pz-card); border-radius:18px; padding:14px 16px 15px}
+.pz-sig:only-child{width:100%; max-width:none}
+.pz-sig .top{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+.pz-tag{font-size:11px; font-weight:700; letter-spacing:.06em; padding:4px 9px; border-radius:99px}
+.pz-tag.t-sell{background:rgba(255,92,108,.16); color:var(--pz-down)} .pz-tag.t-buy{background:rgba(61,220,132,.16); color:var(--pz-up)}
+.pz-tag.t-watch{background:rgba(255,185,56,.16); color:var(--pz-warn)} .pz-tag.t-note{background:var(--pz-card-2); color:var(--pz-ink-2)}
+.pz-sig .tk{font-size:16px; font-weight:600}
+.pz-sig .big{font-size:15px; font-weight:600; margin:0 0 4px; color:#fff}
+.pz-sig p{font-size:13px; line-height:1.4; color:var(--pz-ink-2); margin:0; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden}
+.pz-sig .big{-webkit-line-clamp:1}
+.pz-clear{margin:0 8px; padding:18px; border-radius:18px; background:var(--pz-card); color:var(--pz-ink-2); font-size:14px; display:flex; gap:10px; align-items:center}
+
+.pz-seg{display:flex; margin:28px 0 0; border-bottom:1px solid var(--pz-line)}
+.pz-seg button{flex:1; background:none; border:none; border-bottom:3px solid transparent; color:var(--pz-mute); font:600 16px inherit; font-family:inherit; padding:12px 4px 13px; cursor:pointer}
+.pz-seg button[aria-selected="true"]{color:#fff; border-bottom-color:var(--pz-accent)}
+.pz-chips{display:flex; gap:8px; overflow-x:auto; padding:14px 8px 4px; scrollbar-width:none}
+.pz-chips::-webkit-scrollbar{display:none}
+.pz-chip{flex:none; background:none; border:1px solid rgba(255,255,255,.10); color:var(--pz-mute); font:600 14px inherit; font-family:inherit; padding:8px 14px; border-radius:14px; cursor:pointer; display:flex; align-items:center; gap:7px}
+.pz-chip[aria-pressed="true"]{background:var(--pz-card-2); color:#fff; border-color:transparent}
+.pz-chip b{font-weight:600; color:var(--pz-faint)} .pz-chip[aria-pressed="true"] b{color:var(--pz-ink-2)}
+
+.pz-rows{padding:6px 0 0}
+.pz-row{display:grid; grid-template-columns:52px 1fr auto; gap:0 14px; align-items:center; padding:12px 12px}
+.pz-av{position:relative; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; letter-spacing:.01em; color:#fff}
+.pz-logo{position:absolute; inset:0; width:100%; height:100%; border-radius:50%; object-fit:contain; background:#fff}
+.pz-badge{z-index:1; position:absolute; right:-2px; bottom:-2px; width:20px; height:20px; border-radius:50%; background:var(--pz-ground); display:flex; align-items:center; justify-content:center}
+.pz-ico{display:block; width:10px; height:10px}
+.pz-ico.good{background:var(--pz-up); border-radius:50%}
+.pz-ico.warn{width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:10px solid var(--pz-warn)}
+.pz-ico.crit{background:var(--pz-down); border-radius:2px}
+.pz-row .nm{font-size:17px; font-weight:600; display:flex; align-items:center; gap:8px}
+.pz-row .nm i{font-style:normal; font-size:11px; font-weight:700; color:var(--pz-ink-2); background:var(--pz-card-2); padding:2px 7px; border-radius:99px}
+.pz-row .pz-sub{font-size:13.5px; color:var(--pz-mute); margin-top:2px}
+.pz-row .r{text-align:right}
+.pz-row .px{font-size:17px; font-weight:600}
+.pz-row .ch{font-size:13.5px; font-weight:600; margin-top:2px}
+.pz-row .ch.mute{color:var(--pz-mute); font-weight:500}
+.pz-row .nm .pz-tag{font-size:10.5px; padding:3px 8px}
+.pz-tag.t-buy.t-fx{background:rgba(84,104,255,.18); color:#8D9BFF}
+.pz-sc{position:relative; width:48px; height:48px; margin-left:auto}
+.pz-sc svg{width:100%; height:100%; transform:rotate(-90deg)}
+.pz-sc .trk{fill:none; stroke:var(--pz-card-2); stroke-width:4.5}
+.pz-sc .arc{fill:none; stroke:var(--pz-accent); stroke-width:4.5; stroke-linecap:round}
+.pz-sc b{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700}
+.pz-sc.none{border:2px dashed var(--pz-card-2); border-radius:50%; box-sizing:border-box} .pz-sc.none b{color:var(--pz-faint)}
+.pz-colhead{display:flex; justify-content:space-between; padding:14px 12px 0; font-size:12.5px; font-weight:500; color:var(--pz-mute)}
+.pz-empty-row{padding:26px 12px; color:var(--pz-mute); font-size:14px; text-align:center}
+.pz-foot{margin:22px 12px 0; font-size:11.5px; color:var(--pz-faint); line-height:1.5}
+.pz-meta{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:20px 12px 0; font-size:12.5px; color:var(--pz-mute)}
+.pz-meta button{background:var(--pz-card); border:none; color:var(--pz-ink-2); font:600 12.5px inherit; font-family:inherit; padding:8px 14px; border-radius:99px; cursor:pointer}
+.pz-empty{margin:40px 8px; padding:30px 22px; border-radius:22px; background:var(--pz-card); text-align:center}
+.pz-empty h2{font-size:20px; font-weight:600; margin:0 0 8px} .pz-empty p{font-size:14px; color:var(--pz-ink-2); line-height:1.5; margin:0 0 14px}
+.pz-empty button{background:var(--pz-accent); color:#fff; border:none; font:600 15px inherit; font-family:inherit; padding:12px 26px; border-radius:14px; cursor:pointer}
+@media (max-width:380px){ .pz-total, .pz-total small{font-size:38px} .pz-ring{width:82px; height:82px} }

@@ -273,6 +273,8 @@ export interface SchwabQuote {
   symbol: string;
   assetType: string | null;
   last: number | null;
+  /** Last REGULAR-session trade (no pre/post-market). What a "daily close" rule should read after 4pm ET. */
+  regularLast: number | null;
   close: number | null;
   netChange: number | null;
   netPct: number | null;
@@ -303,7 +305,7 @@ export async function quotes(symbols: string[], cfg: SchwabConfig = schwabConfig
   const wanted = symbols.map((s) => s.toUpperCase());
   const raw = await apiGet<Record<string, RawQuoteEntry>>(
     "/marketdata/v1/quotes",
-    { symbols: wanted.map(schwabSymbol).join(","), fields: "quote,reference", indicative: false },
+    { symbols: wanted.map(schwabSymbol).join(","), fields: "quote,reference,regular", indicative: false },
     cfg,
   );
   const out: SchwabQuote[] = [];
@@ -311,7 +313,7 @@ export async function quotes(symbols: string[], cfg: SchwabConfig = schwabConfig
     const key = schwabSymbol(sym);
     const e = raw[key] ?? raw[sym];
     if (!e || e.invalidSymbols?.length) {
-      out.push({ symbol: sym, assetType: null, last: null, close: null, netChange: null, netPct: null, bid: null, ask: null, volume: null, tradeTime: null, high52: null, low52: null, description: null, invalid: true });
+      out.push({ symbol: sym, assetType: null, last: null, regularLast: null, close: null, netChange: null, netPct: null, bid: null, ask: null, volume: null, tradeTime: null, high52: null, low52: null, description: null, invalid: true });
       continue;
     }
     const q = e.quote ?? {};
@@ -319,6 +321,7 @@ export async function quotes(symbols: string[], cfg: SchwabConfig = schwabConfig
       symbol: sym,
       assetType: e.assetMainType ?? null,
       last: numOrNull(q["lastPrice"]) ?? numOrNull(e.regular?.["regularMarketLastPrice"]),
+      regularLast: numOrNull(e.regular?.["regularMarketLastPrice"]),
       close: numOrNull(q["closePrice"]),
       netChange: numOrNull(q["netChange"]),
       netPct: numOrNull(q["netPercentChange"]),

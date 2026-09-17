@@ -1,0 +1,108 @@
+{
+  "asOf": "2026-09-04",
+  "source": "Altovix Chief Investment Agent baseline (claude/altovix-scores.json): eight-factor Altovix Score over the committee's outputs. Refreshed by the agents, not by the price check.",
+  "scores": {
+    "NPK": {
+      "score": 59.8,
+      "action": 58,
+      "confidence": 52,
+      "stance": "HOLD (ADD CANDIDATE 09-17, limit orders)"
+    },
+    "DCO": {
+      "score": 49.3,
+      "action": 55,
+      "confidence": 50,
+      "stance": "HOLD starter (ADD only on close > $176 after 09-17)"
+    },
+    "HII": {
+      "score": 56.4,
+      "action": 52,
+      "confidence": 50,
+      "stance": "HOLD (ADD CANDIDATE 09-17 after FOMC)"
+    },
+    "XOM": {
+      "score": 65.0,
+      "action": 50,
+      "confidence": 54,
+      "stance": "HOLD (full size)"
+    },
+    "AVAV": {
+      "score": 44.1,
+      "action": 45,
+      "confidence": 42,
+      "stance": "WATCH (earnings 09-09)"
+    },
+    "BWXT": {
+      "score": 54.5,
+      "action": 42,
+      "confidence": 50,
+      "stance": "HOLD (second tranche after 09-29 investor day)"
+    },
+    "GOOGL": {
+      "score": 58.7,
+      "action": 40,
+      "confidence": 48,
+      "stance": "HOLD (adds frozen by operator override)"
+    },
+    "POWL": {
+      "score": 53.0,
+      "action": 30,
+      "confidence": 40,
+      "stance": "WATCH (re-open on close > $200)"
+    },
+    "MSFT": {
+      "score": 65.2,
+      "action": 38,
+      "confidence": 50,
+      "stance": "HOLD (adds frozen)"
+    },
+    "NVDA": {
+      "score": 68.2,
+      "action": 38,
+      "confidence": 48,
+      "stance": "HOLD (adds frozen)"
+    },
+    "JPM": {
+      "score": 62.3,
+      "action": 36,
+      "confidence": 50,
+      "stance": "HOLD (adds frozen; stop is 2.7% away)"
+    },
+    "RGR": {
+      "score": 57.5,
+      "action": 40,
+      "confidence": 48,
+      "stance": "HOLD (second tranche 09-17)"
+    },
+    "CDRE": {
+      "score": 54.7,
+      "action": 38,
+      "confidence": 48,
+      "stance": "HOLD (second half conditional)"
+    },
+    "KTOS": {
+      "score": 42.5,
+      "action": 35,
+      "confidence": 42,
+      "stance": "WATCH (conditional entry on 50-day reclaim)"
+    },
+    "RCAT": {
+      "score": 42.2,
+      "action": 25,
+      "confidence": 40,
+      "stance": "HOLD 1% (never added to)"
+    },
+    "LEU": {
+      "score": 38.2,
+      "action": 15,
+      "confidence": 35,
+      "stance": "AVOID (screen only)"
+    },
+    "CW": {
+      "score": 50.0,
+      "action": 20,
+      "confidence": 35,
+      "stance": "AVOID (screen only - a defense blue chip)"
+    }
+  }
+}
