@@ -1,6 +1,6 @@
 // Loads .env into process.env as a side effect - must come before schwabConfig() reads it.
 import "../core/config.ts";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { resolve } from "node:path";
@@ -11,6 +11,7 @@ import {
 } from "../core/market/schwab.ts";
 import { parseAgentScores, parseRuleBook, runCheck, tickersFor, type AgentScores, type CheckResult, type RuleBook } from "../core/check/engine.ts";
 import { ensureTopic, ntfyConfig, planAlerts, readState, sendAlert, summaryLine, writeState, type Alert } from "../core/check/notify.ts";
+import { detectRepo, publishStatus, readToken, saveToken, whoAmI } from "../core/check/publish.ts";
 import { parseArgs, bool, str, heading, c, die } from "./args.ts";
 
 /**
@@ -19,7 +20,8 @@ import { parseArgs, bool, str, heading, c, die } from "./args.ts";
  * npm run check -- --setup           one-time: phone alerts + the three daily scheduled runs
  * npm run check -- --test-alert      send a test notification
  * npm run check -- --remove-schedule stop the automatic runs
- * (or double-click altovix-check.cmd / altovix-setup.cmd)
+ * npm run check -- --publish-setup   one-time: the GitHub key that lets this PC publish status.json for the phone app
+ * (or double-click altovix-check.cmd / altovix-setup.cmd / altovix-publish-setup.cmd)
  *
  * Rules live in rules/book.json. Every rule fires on a completed daily close; between runs nothing
  * is lost - each run re-reads the whole history, so a missed day is reported by the next run.
@@ -141,19 +143,43 @@ async function check(): Promise<void> {
     live[t] = sessionComplete ? null : px;
   });
 
-  const result = runCheck({ book, agents: loadAgents(), bars, live, asOf: clock.date, sessionComplete });
+  const names: Record<string, string> = {};
+  for (const q of qs) if (q.description) names[q.symbol] = q.description;
+  const result = runCheck({ book, agents: loadAgents(), names, bars, live, asOf: clock.date, sessionComplete });
   const plan = planAlerts(result, state);
 
+  let publishNote = "";
+  const publishProblems: string[] = [];
   if (persist) {
     const path = resolve(process.cwd(), STATUS);
     mkdirSync(resolve(path, ".."), { recursive: true });
-    writeFileSync(path, JSON.stringify({ generatedAt: new Date().toISOString(), rulesUpdated: book.updated ?? null, ...result }, null, 2) + "\n");
+    const json = JSON.stringify({ generatedAt: new Date().toISOString(), rulesUpdated: book.updated ?? null, ...result }, null, 2) + "\n";
+    writeFileSync(path, json);
+    // A copy at the repo root rides along with every ordinary push: the phone app falls back to it
+    // when the live copy (the "status" branch) cannot be read.
+    try { writeFileSync(resolve(process.cwd(), "status.json"), json); } catch { /* read-only checkout - the live copy still goes out */ }
+    const token = readToken();
+    const repo = detectRepo();
+    if (token && repo && !bool(args, "no-publish")) {
+      try {
+        await publishStatus({ ...repo, token, content: json, apiBase: process.env["GITHUB_API_BASE"], message: `status: ${clock.date}${sessionComplete ? " close" : ""}` });
+        publishNote = `Published to the phone app (${repo.owner}/${repo.repo}, branch status).`;
+      } catch (err) {
+        publishProblems.push((err as Error).message);
+        const key = `PUBLISH_FAILED:${clock.date}`;
+        if (!(key in state.sent)) {
+          const probs = await notify([{ title: "Altovix: the app is not updating", message: `This PC could not publish today's numbers to the phone app. ${(err as Error).message.slice(0, 160)}`, priority: 3, tags: ["warning"] }], send);
+          if (!probs.length) state.sent[key] = new Date().toISOString();
+        }
+      }
+    } else if (!token) publishNote = "The phone app is not being updated yet - double-click altovix-publish-setup.cmd once.";
   }
   if (bool(args, "json")) { console.log(JSON.stringify(result, null, 2)); }
   else if (!quiet) print(result, book, plan.keys);
 
   const problems = await notify(plan.alerts, send);
   if (errors.length) problems.push(...errors.slice(0, 5));
+  problems.push(...publishProblems);
   if (persist) {
     // Only mark alerts as sent when they were really delivered; otherwise the next run retries.
     if (send && !problems.some((p) => p.startsWith("ntfy") || p.startsWith("phone alerts"))) {
@@ -169,6 +195,7 @@ async function check(): Promise<void> {
   else {
     if (plan.alerts.length && send && !problems.length) console.log(c.green(`\nSent ${plan.alerts.length} notification(s) to your phone.`));
     if (!plan.alerts.length) console.log(c.dim("\nNothing new to send to your phone."));
+    if (publishNote) console.log(publishNote.startsWith("Published") ? c.green(publishNote) : c.yellow(publishNote));
     for (const p of problems) console.log(c.yellow(`! ${p}`));
   }
 }
@@ -203,7 +230,7 @@ function print(r: CheckResult, book: RuleBook, freshKeys: string[]): void {
   console.log(`\n${c.dim(ctx)}`);
   if (r.missing.length) console.log(c.yellow(`No data for: ${r.missing.join(", ")}`));
   for (const n of book.standingNotes ?? []) console.log(c.dim(`- ${n}`));
-  console.log(c.dim("\nRule checks on a paper book - decision support, not investment advice."));
+  console.log(c.dim("\nRule checks - decision support, not investment advice."));
 }
 
 // ---------------------------------------------------------------------------
@@ -285,8 +312,58 @@ async function setup(): Promise<void> {
   await check();
 }
 
+const TOKEN_URL = "https://github.com/settings/tokens/new?description=Altovix%20phone%20app&scopes=public_repo";
+
+async function publishSetup(): Promise<void> {
+  const repo = detectRepo();
+  if (!repo) die("could not tell which GitHub repository this folder belongs to (.git/config not found).");
+  heading("Altovix - let this PC update the phone app");
+  console.log(`Your phone app reads its numbers from GitHub (${repo.owner}/${repo.repo}). This PC needs a GitHub key to put them there.\n`);
+  console.log("1. A GitHub page is opening in your browser (sign in to GitHub if it asks). If it does not open, go to:\n");
+  console.log(`   ${c.cyan(TOKEN_URL)}\n`);
+  console.log(`2. On that page: the note and the ${c.bold("public_repo")} box are already filled in.`);
+  console.log(`   Set ${c.bold("Expiration")} to ${c.bold("No expiration")} (otherwise you redo this every month).`);
+  console.log(`   Scroll to the bottom and click the green ${c.bold("Generate token")} button.`);
+  console.log(`3. GitHub shows the key ONCE - it starts with ${c.bold("ghp_")}. Click the copy icon next to it.`);
+  console.log(c.yellow("   Paste it ONLY into this window. Never into a chat, an email or a file in the repo.\n"));
+  try {
+    const p = process.platform === "win32"
+      ? spawnDetached("cmd", ["/c", `start "" "${TOKEN_URL}"`], true)
+      : spawnDetached(process.platform === "darwin" ? "open" : "xdg-open", [TOKEN_URL], false);
+    void p;
+  } catch { /* the printed address is the fallback */ }
+  const rl = createInterface({ input: stdin, output: stdout });
+  try {
+    for (;;) {
+      const token = (await rl.question(c.bold("4. Paste the key here and press Enter: "))).trim();
+      if (!token) continue;
+      try {
+        const login = await whoAmI(token, process.env["GITHUB_API_BASE"]);
+        const where = saveToken(token);
+        console.clear();
+        console.log(c.green(`Key accepted (GitHub user ${login}). Saved on this PC only: ${where}`));
+        break;
+      } catch (err) {
+        console.log(c.red((err as Error).message));
+        console.log(c.yellow("Copy the key again (the whole thing, starting with ghp_) and paste it once more."));
+      }
+    }
+  } finally {
+    rl.close();
+  }
+  console.log("\nRunning a check now so the app gets its first numbers...\n");
+  await check();
+}
+
+function spawnDetached(cmd: string, a: string[], verbatim: boolean): void {
+  const p = spawn(cmd, a, { detached: true, stdio: "ignore", windowsHide: true, windowsVerbatimArguments: verbatim });
+  p.on("error", () => { /* the printed address is the fallback */ });
+  p.unref();
+}
+
 try {
-  if (bool(args, "setup")) await setup();
+  if (bool(args, "publish-setup")) await publishSetup();
+  else if (bool(args, "setup")) await setup();
   else if (bool(args, "install-schedule")) await installSchedule();
   else if (bool(args, "remove-schedule")) await removeSchedule();
   else if (bool(args, "test-alert")) {

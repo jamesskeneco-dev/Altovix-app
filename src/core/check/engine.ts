@@ -138,6 +138,8 @@ export function parseAgentScores(json: string): AgentScores {
 export interface CheckInput {
   /** Optional: the agents' scores, attached to every holding and trade so the phone can show them. */
   agents?: AgentScores;
+  /** Optional: company names by ticker (from the quote feed), passed through for the phone. */
+  names?: Record<string, string>;
   book: RuleBook;
   /** Daily bars per ticker, oldest first. May include today's (possibly unfinished) bar. */
   bars: Record<string, Bar[]>;
@@ -221,6 +223,9 @@ export interface CheckResult {
   missing: string[];
   closed: Array<ClosedLot & { pnlPct: number; proceeds: number }>;
   agentsAsOf: string | null;
+  /** Every name the agents have scored, held or not - the phone's "all picks" list. */
+  agentScores: Record<string, AgentScore>;
+  names: Record<string, string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -540,6 +545,8 @@ export function runCheck(input: CheckInput): CheckResult {
     context, missing,
     closed: (book.closed ?? []).map((l) => ({ ...l, pnlPct: r2(pct(l.exitPrice, l.fill)), proceeds: r2(l.shares * l.exitPrice) })),
     agentsAsOf: input.agents?.asOf ?? null,
+    agentScores: input.agents?.scores ?? {},
+    names: input.names ?? {},
   };
 }
 

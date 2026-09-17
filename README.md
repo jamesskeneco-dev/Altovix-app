@@ -79,6 +79,17 @@ quotes for every ticker in it and evaluates every rule:
 - `altovix-setup.cmd` (once): creates the private ntfy topic (kept in `data/`, never in the repo), sends a test
   alert, and registers three Windows scheduled runs on weekdays - 10:00, 13:00 and 16:15 New York time.
 
+### The phone app's live numbers
+
+The app (`index.html`, GitHub Pages) has four screens fed by the market check: **Home** (book value, Opportunity,
+every holding with its logo and the agents' score), **Needs you**, **Search** (every pick) and **Agents**. After each
+check the PC publishes `status.json` to a side branch, **`status`**, through the GitHub API, and the app reads it from
+`raw.githubusercontent.com` (falling back to the copy of `status.json` that ships with the site). `main` is never
+written by the script. One-time: `altovix-publish-setup.cmd` asks for a GitHub key (classic token, `public_repo`) and
+stores it outside the repo (`%LOCALAPPDATA%\Altovix\github-token.txt`). The repo is public, so is `status.json`.
+The screens live in `scripts/pulse/` (`pulse.css`, `pulse.html`, `pulse.js`); `python scripts/pulse/patch_pulse.py`
+splices them into `index.html` between markers and can be re-run after any edit.
+
 ### Schwab market data (optional)
 
 With a [Schwab Trader API](https://developer.schwab.com) app (callback `https://127.0.0.1:8182`,
