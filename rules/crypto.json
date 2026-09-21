@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "updated": "2026-09-21",
+  "notes": [
+    "The crypto sleeve's hard limits. Every number here is a ceiling the code will not cross.",
+    "live=false: every order is validated against Kraken and NOT sent. Set live=true to trade for real.",
+    "The kill switch (a file at killSwitchFile) blocks new BUYS on the next cycle. Protective SELLS still fire.",
+    "Real money. Nothing here is investment advice; these are limits, not predictions."
+  ],
+  "live": false,
+  "sleeveUsd": 400,
+  "maxOrderUsd": 100,
+  "maxPositionUsd": 120,
+  "maxPositions": 4,
+  "maxDailyLossUsd": 40,
+  "maxDailyBuys": 4,
+  "maxCommitteeRunsPerCycle": 2,
+  "minConfidence": 0.58,
+  "cooldownHours": 12,
+  "stopPct": 0.12,
+  "takeProfitPct": 0.40,
+  "trailPct": 0.15,
+  "maxHoldDays": 21,
+  "entrySlippagePct": 0.004,
+  "minVolume24hUsd": 3000000,
+  "minPriceUsd": 0.0005,
+  "quote": "USD",
+  "excludeAssets": ["USDT", "USDC", "DAI", "PYUSD", "USDG", "USDS", "USDE", "USDR", "TUSD", "EUR", "GBP", "CAD", "JPY", "CHF", "AUD", "WBTC", "TBTC", "WETH", "CBBTC", "USDQ", "RLUSD", "EURT", "EURC", "PAXG", "XAUT"],
+  "blocklist": [],
+  "watchOnly": [],
+  "killSwitchFile": "./data/crypto-KILL"
+}

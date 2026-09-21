@@ -473,7 +473,7 @@ body.pulse-on .brandbtns{margin-left:auto; display:flex; gap:8px}
 
 /* floating pill tab bar on phones (all tabs, so the app feels like one thing) */
 @media (max-width:720px){
-  .tabs{left:16px; right:16px; bottom:calc(12px + env(safe-area-inset-bottom)); grid-template-columns:repeat(5,1fr); padding:7px;
+  .tabs{left:16px; right:16px; bottom:calc(12px + env(safe-area-inset-bottom)); grid-template-columns:repeat(6,1fr); padding:7px;
     border-radius:30px; border:1px solid rgba(255,255,255,.09); background:rgba(17,19,31,.86);
     -webkit-backdrop-filter:blur(18px) saturate(1.4); backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 12px 32px -8px rgba(0,0,0,.6)}
   .tab{font-size:0; letter-spacing:0; padding:9px 0; border-radius:22px; color:#8A8FA8; position:relative}
@@ -673,6 +673,30 @@ body.pz-sheet-open{overflow:hidden}
 .pz-hist span{font-size:12.5px; font-weight:600; color:var(--pz-mute); padding-top:2px}
 .pz-hist b{font-size:14.5px; font-weight:600} .pz-hist p{font-size:13px; margin:2px 0 0; color:var(--pz-mute)}
 @media (max-width:380px){ .pz-px{font-size:34px} .pz-grid{gap:0 12px} }
+
+
+/* ---------- Crypto sleeve ---------- */
+.pz-mode{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:.06em; padding:4px 10px; border-radius:99px; background:var(--pz-card-2); color:var(--pz-ink-2)}
+.pz-mode.live{background:rgba(255,92,108,.18); color:#FF8A96} .pz-mode.validate{background:rgba(255,185,56,.16); color:var(--pz-warn)}
+.pz-mode.halt{background:rgba(255,92,108,.28); color:#fff} .pz-mode.kill{background:#FF5C6C; color:#fff}
+.pz-cx-head{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 8px}
+.pz-cx-stat{padding:14px 16px; border-radius:18px; background:var(--pz-card)}
+.pz-cx-stat p{margin:0} .pz-cx-stat .k{font-size:12.5px; color:var(--pz-mute); font-weight:500} .pz-cx-stat .v{font-size:24px; font-weight:700; letter-spacing:-.02em; margin-top:2px} .pz-cx-stat .s{font-size:12.5px; color:var(--pz-mute); margin-top:2px}
+.pz-cx-pos{margin:0 8px 10px; padding:14px 16px; border-radius:18px; background:var(--pz-card)}
+.pz-cx-pos .top{display:grid; grid-template-columns:52px 1fr auto; gap:0 14px; align-items:center}
+.pz-cx-pos .nm{font-size:17px; font-weight:600} .pz-cx-pos .nm2{font-size:13px; color:var(--pz-mute); margin-top:2px}
+.pz-cx-pos .r{text-align:right} .pz-cx-pos .px{font-size:17px; font-weight:600} .pz-cx-pos .ch{font-size:13.5px; font-weight:600; margin-top:2px}
+.pz-cx-bar{position:relative; height:6px; border-radius:3px; margin:14px 4px 6px; background:linear-gradient(90deg,var(--pz-down) 0,var(--pz-card-2) 30%,var(--pz-card-2) 70%,var(--pz-up) 100%)}
+.pz-cx-bar i{position:absolute; top:-5px; width:16px; height:16px; margin-left:-8px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px var(--pz-card)}
+.pz-cx-bar b{position:absolute; top:-3px; width:2px; height:12px; margin-left:-1px; background:var(--pz-warn); border-radius:1px}
+.pz-cx-lbl{display:flex; justify-content:space-between; font-size:11.5px; color:var(--pz-mute); margin:0 2px} .pz-cx-lbl span b{color:var(--pz-ink-2); font-weight:600}
+.pz-cx-thesis{font-size:13px; color:var(--pz-ink-2); line-height:1.45; margin:10px 0 0}
+.pz-cx-ev{margin:0 8px 8px; padding:12px 14px; border-radius:14px; background:var(--pz-card); font-size:13.5px; line-height:1.45; color:var(--pz-ink-2); display:grid; grid-template-columns:auto 1fr; gap:0 10px; align-items:start}
+.pz-cx-ev time{font-size:11.5px; color:var(--pz-mute); white-space:nowrap; padding-top:2px}
+.pz-cx-ev.entry, .pz-cx-ev.exit{border-left:3px solid var(--pz-up)} .pz-cx-ev.exit{border-left-color:var(--pz-down)}
+.pz-cx-ev.halt, .pz-cx-ev.error{border-left:3px solid var(--pz-down)} .pz-cx-ev.refused{border-left:3px solid var(--pz-warn)} .pz-cx-ev.validated{border-left:3px solid var(--pz-warn)}
+.pz-tag.t-setup{background:var(--pz-accent-soft); color:#9AA6FF}
+.pz-row .nm2.reasons{white-space:normal; font-size:12.5px}
 /* PULSE:CSS:END */
 </style>
 </head>
@@ -694,7 +718,7 @@ body.pz-sheet-open{overflow:hidden}
       <div class="tape-date" id="today-date"></div>
       <div class="brandbtns"><button class="themebtn icon" id="settingsbtn" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="lbl">Settings</span></button><button class="themebtn icon" id="themebtn" type="button" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg><span class="lbl">Theme</span></button></div>
     </div>
-    <nav class="tabs" role="tablist" aria-label="Terminal sections"><!--PZNAV--><button class="tab" role="tab" aria-selected="true" data-tab="pulse"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.2 12 4l8 7.2V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.2a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5.2H5.5A1.5 1.5 0 0 1 4 19z"/></svg>HOME</button><button class="tab" role="tab" aria-selected="false" data-tab="needs"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>NEEDS YOU <span class="pz-count" id="pz-needs-count"></span></button><button class="tab" role="tab" aria-selected="false" data-tab="picks"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>SEARCH</button><button class="tab" role="tab" aria-selected="false" data-tab="agents"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M17 14.6c2.200.2 3.6 1.7 4 4.400"/></svg>AGENTS</button><!--/PZNAV--><button class="tab" role="tab" aria-selected="false" data-tab="desk"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>DESK</button><button class="tab pz-legacy-tab" role="tab" aria-selected="false" data-tab="lists"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>LISTS</button><button class="tab pz-legacy-tab" role="tab" aria-selected="false" data-tab="committee"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M12 10v4M8 15l2-1M16 15l-2-1"/></svg>CM</button><button class="tab pz-legacy-tab" role="tab" aria-selected="false" data-tab="calibration"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16M6 16V9M11 16V5M16 16v-7"/></svg>GR <span class="dot hide" id="cal-dot"></span></button><button class="tab pz-legacy-tab" role="tab" aria-selected="false" data-tab="book"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z"/><path d="M5 4v16"/></svg>BK <span class="count" id="tab-trades">0</span></button><button class="tab desk-only" role="tab" aria-selected="false" data-tab="method">METHOD</button></nav>
+    <nav class="tabs" role="tablist" aria-label="Terminal sections"><!--PZNAV--><button class="tab" role="tab" aria-selected="true" data-tab="pulse"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.2 12 4l8 7.2V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.2a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5.2H5.5A1.5 1.5 0 0 1 4 19z"/></svg>HOME</button><button class="tab" role="tab" aria-selected="false" data-tab="needs"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>NEEDS YOU <span class="pz-count" id="pz-needs-count"></span></button><button class="tab" role="tab" aria-selected="false" data-tab="picks"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>SEARCH</button><button class="tab" role="tab" aria-selected="false" data-tab="agents"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M17 14.6c2.200.2 3.6 1.7 4 4.400"/></svg>AGENTS</button><button class="tab" role="tab" aria-selected="false" data-tab="crypto"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 8h3.2a2 2 0 0 1 0 4H9.5zM9.5 12h3.7a2 2 0 0 1 0 4H9.5zM11 6.5V8M11 16v1.5"/></svg>CRYPTO</button><!--/PZNAV--><button class="tab" role="tab" aria-selected="false" data-tab="desk"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>DESK</button><button class="tab pz-legacy-tab" role="tab" aria-selected="false" data-tab="lists"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>LISTS</button><button class="tab pz-legacy-tab" role="tab" aria-selected="false" data-tab="committee"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M12 10v4M8 15l2-1M16 15l-2-1"/></svg>CM</button><button class="tab pz-legacy-tab" role="tab" aria-selected="false" data-tab="calibration"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16M6 16V9M11 16V5M16 16v-7"/></svg>GR <span class="dot hide" id="cal-dot"></span></button><button class="tab pz-legacy-tab" role="tab" aria-selected="false" data-tab="book"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z"/><path d="M5 4v16"/></svg>BK <span class="count" id="tab-trades">0</span></button><button class="tab desk-only" role="tab" aria-selected="false" data-tab="method">METHOD</button></nav>
   </div>
 </header>
 
@@ -708,6 +732,7 @@ body.pz-sheet-open{overflow:hidden}
   <section id="p-needs" role="tabpanel" class="pz" hidden><div id="needs-root"></div></section>
   <section id="p-picks" role="tabpanel" class="pz" hidden><div id="picks-root"></div></section>
   <section id="p-agents" role="tabpanel" class="pz" hidden><div id="agents-root"></div></section>
+  <section id="p-crypto" role="tabpanel" class="pz" hidden><div id="crypto-root"></div></section>
   <div class="pz-legacy" id="pz-legacy" hidden>
     <button type="button" data-go="desk">Desk</button><button type="button" data-go="lists">Lists</button><button type="button" data-go="committee">Committee</button><button type="button" data-go="calibration">Grades</button><button type="button" data-go="book">Book</button>
   </div>
@@ -2252,7 +2277,7 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
   /* ============================ events ============================ */
 
   function switchTab(name) {
-    ["pulse", "needs", "picks", "agents", "desk", "lists", "dash", "committee", "calibration", "book", "method"].forEach(function (t) {
+    ["pulse", "needs", "picks", "agents", "crypto", "desk", "lists", "dash", "committee", "calibration", "book", "method"].forEach(function (t) {
       $("p-" + t).hidden = t !== name;
     });
     Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) {
@@ -2458,9 +2483,10 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
-  var HOME = $("pulse-root"), NEEDS = $("needs-root"), PICKS = $("picks-root"), AGENTS = $("agents-root"), SHEET = $("pz-sheet");
+  var HOME = $("pulse-root"), NEEDS = $("needs-root"), PICKS = $("picks-root"), AGENTS = $("agents-root"), CRYPTO = $("crypto-root"), SHEET = $("pz-sheet");
   if (!HOME || !SHEET) return;
-  var NEW_PANELS = ["p-pulse", "p-needs", "p-picks", "p-agents"];
+  var NEW_PANELS = ["p-pulse", "p-needs", "p-picks", "p-agents", "p-crypto"];
+  var CRYPTO_CACHE_KEY = "altovix.crypto.v1";
   var CACHE_KEY = "altovix.pulse.v1";
   var DEFAULT_REPO = "jamesskeneco-dev/Altovix-app";
   /* company logos: one square PNG per ticker; a missing one falls back to the monogram underneath */
@@ -2498,6 +2524,16 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
       "https://raw.githubusercontent.com/" + r + "/status/status.json?t=" + Date.now(),
       "https://api.github.com/repos/" + r + "/contents/status.json?ref=status&t=" + Date.now(),
       "./status.json?t=" + Date.now() /* the copy that ships with the site: older, but always there */
+    ];
+  }
+  function cryptoSources() {
+    var over = null;
+    try { over = localStorage.getItem("altovix.crypto.url"); } catch (e) {}
+    if (over) return [over];
+    var r = repo();
+    return [
+      "https://raw.githubusercontent.com/" + r + "/status/crypto-status.json?t=" + Date.now(),
+      "https://api.github.com/repos/" + r + "/contents/crypto-status.json?ref=status&t=" + Date.now()
     ];
   }
   function store() {
@@ -3000,6 +3036,92 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
     }).join("");
   }
 
+
+  /* ---------- Crypto sleeve (fed by crypto-status.json from `npm run kraken -- run`) ---------- */
+  var lastCrypto = null;
+  function coin(sym) { return String(sym || "").split("-")[0]; }
+  function cxPrice(v) { if (v == null) return "–"; v = Number(v); return v >= 1000 ? num(v, 0) : v >= 1 ? num(v, 2) : v.toPrecision(4); }
+  function cxUsd(v) { return v == null ? "–" : (v < 0 ? "−" : "") + "$" + num(Math.abs(v)); }
+  function cxWhen(iso) { try { var d = new Date(iso); return MON[d.getMonth()] + " " + d.getDate() + " " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); } catch (e) { return ""; } }
+  function cxAvatar(sym) {
+    var tk = coin(sym), h = 0, i; for (i = 0; i < tk.length; i++) h = (h * 31 + tk.charCodeAt(i)) >>> 0;
+    return '<div class="pz-av" style="background:' + AV[h % AV.length] + '">' + esc(tk.slice(0, 4)) + "</div>";
+  }
+  function renderCrypto(cs, problem) {
+    if (!CRYPTO) return;
+    if (!cs) {
+      CRYPTO.innerHTML = '<h1 class="pz-title">Crypto</h1><p class="pz-lede">The Kraken sleeve: volatile coins the scanner finds, the committee judges, and the guard sizes.</p>' +
+        '<div class="pz-empty"><h2>Not running yet</h2><p>This fills in after the first <code>npm run kraken -- run</code> on your PC publishes its result.' + (problem ? "<br><small>" + esc(problem) + "</small>" : "") + '</p><button type="button" data-pz="refresh">Try again</button></div>';
+      return;
+    }
+    var modeCls = cs.killSwitch ? "kill" : cs.halted ? "halt" : cs.mode === "LIVE" ? "live" : "validate";
+    var modeTxt = cs.killSwitch ? "KILL SWITCH" : cs.halted ? "HALTED" : cs.mode === "LIVE" ? "LIVE · REAL MONEY" : "VALIDATE · NOTHING SENT";
+    var pnl = cs.dayPnl || {}, ageH = (Date.now() - new Date(cs.generatedAt).getTime()) / 36e5;
+    var h = '<h1 class="pz-title">Crypto <span class="pz-mode ' + modeCls + '">' + modeTxt + "</span></h1>" +
+      '<p class="pz-lede">' + esc(cs.summary || "") + "</p>";
+    if (ageH > 6) h += '<div class="pz-stale">The last crypto cycle ran ' + (ageH > 48 ? Math.round(ageH / 24) + " days" : Math.round(ageH) + " hours") + " ago. Is the PC on and altovix-crypto.cmd running?</div>";
+    if (cs.halted) h += '<div class="pz-stale">Halted ' + esc(cxWhen(cs.halted.at)) + ": " + esc(cs.halted.reason) + ". New buys resume on the next UTC day; stops still run.</div>";
+    h += '<div class="pz-cx-head"><div class="pz-cx-stat"><p class="k">Deployed</p><p class="v">' + cxUsd(cs.exposureUsd) + '</p><p class="s">of a ' + cxUsd(cs.sleeveUsd) + " sleeve</p></div>" +
+      '<div class="pz-cx-stat"><p class="k">Today</p><p class="v ' + ((pnl.total || 0) >= 0 ? "pz-up" : "pz-down") + '">' + cxUsd(pnl.total) + '</p><p class="s">' + cxUsd(pnl.realized) + " realised · " + cxUsd(pnl.unrealized) + " open</p></div></div>";
+
+    var pos = cs.positions || [];
+    h += '<div class="pz-h">Positions<small>' + pos.length + " open</small></div>";
+    h += pos.length ? pos.map(function (p) {
+      var lo = p.stop, hi = p.takeProfit, mark = p.mark == null ? p.avgCost : p.mark;
+      var at = function (v) { return Math.max(0, Math.min(100, (v - lo) / (hi - lo) * 100)); };
+      var trailOn = p.trail > p.stop;
+      return '<div class="pz-cx-pos"><div class="top">' + cxAvatar(p.symbol) + '<div><div class="nm">' + esc(coin(p.symbol)) + '</div><div class="nm2">' + esc(p.volume) + " @ $" + cxPrice(p.avgCost) + " · " + cxUsd(p.costUsd) + " · since " + esc(shortDay(String(p.openedAt).slice(0, 10))) + "</div></div>" +
+        '<div class="r"><div class="px">$' + cxPrice(mark) + '</div><div class="ch">' + change(p.unrealizedPct == null ? null : p.unrealizedPct * 100) + "</div></div></div>" +
+        '<div class="pz-cx-bar"><i style="left:' + at(mark).toFixed(1) + '%"></i>' + (trailOn ? '<b style="left:' + at(p.trail).toFixed(1) + '%" title="trailing stop"></b>' : "") + "</div>" +
+        '<div class="pz-cx-lbl"><span>stop <b>$' + cxPrice(p.stop) + "</b></span>" + (trailOn ? "<span>trail <b>$" + cxPrice(p.trail) + "</b></span>" : "<span>high <b>$" + cxPrice(p.highWater) + "</b></span>") + "<span>take profit <b>$" + cxPrice(p.takeProfit) + "</b></span></div>" +
+        (p.thesis ? '<p class="pz-cx-thesis">' + esc(firstSentence(p.thesis, 200)) + "</p>" : "") + "</div>";
+    }).join("") : '<div class="pz-empty-row">Nothing held. ' + (cs.mode === "LIVE" ? "The guard has not let a buy through yet." : "Validate mode: simulated fills would show here.") + "</div>";
+
+    var cands = (cs.candidates || []).filter(function (r) { return !r.excluded; }).slice(0, 10);
+    h += '<div class="pz-h">Scanner<small>top ' + cands.length + "</small></div>";
+    h += '<div class="pz-rows">' + (cands.length ? cands.map(function (r) {
+      var ret = r.ret1d == null ? null : r.ret1d * 100;
+      return '<div class="pz-row has-score">' + cxAvatar(r.symbol) + '<div><div class="nm">' + esc(coin(r.symbol)) + (r.setup && r.setup !== "NONE" ? '<span class="pz-tag t-setup">' + esc(r.setup.replace("_", " ")) + "</span>" : "") + '</div><div class="nm2 reasons">' + esc((r.reasons || []).slice(0, 3).join(" · ") || ("ATR " + ((r.atrPct14 || 0) * 100).toFixed(1) + "%/day · $" + ((r.volume24hUsd || 0) / 1e6).toFixed(1) + "M/24h")) + "</div></div>" +
+        '<div class="r"><div class="px">$' + cxPrice(r.price) + '</div><div class="ch">' + change(ret, 1) + "</div></div>" + scoreRing(r.score) + "</div>";
+    }).join("") : '<div class="pz-empty-row">Nothing above the liquidity floor scored.</div>') + "</div>";
+
+    var runs = cs.committeeRuns || [];
+    if (runs.length) h += '<div class="pz-h">Committee this cycle</div>' + runs.map(function (r) {
+      return '<div class="pz-cx-ev"><time>#' + esc(r.runId) + "</time><div><b>" + esc(coin(r.symbol)) + "</b> · " + esc(r.action || "no decision") + (r.confidence != null ? " · confidence " + Number(r.confidence).toFixed(2) : "") + (r.sizePct != null && r.action === "BUY" ? " · " + r.sizePct + "% of sleeve" : "") + "</div></div>";
+    }).join("");
+
+    var evs = (cs.events || []).filter(function (e) { return e.kind !== "INFO" || /halt|kill|not convened/i.test(e.message); }).slice(-12).reverse();
+    h += '<div class="pz-h">Journal<small>' + esc(cxWhen(cs.generatedAt)) + "</small></div>";
+    h += evs.length ? evs.map(function (e) {
+      return '<div class="pz-cx-ev ' + esc(String(e.kind).toLowerCase()) + '"><time>' + esc(String(e.kind)) + "</time><div>" + esc(e.message) + "</div></div>";
+    }).join("") : '<div class="pz-empty-row">Quiet cycle.</div>';
+    var trades = (cs.recentTrades || []).slice(0, 8);
+    if (trades.length) h += '<div class="pz-h">Recent fills</div>' + trades.map(function (t) {
+      return '<div class="pz-cx-ev ' + (t.side === "BUY" ? "entry" : "exit") + '"><time>' + esc(cxWhen(t.at)) + "</time><div><b>" + esc(t.side) + " " + esc(coin(t.symbol)) + "</b> " + esc(t.volume) + " @ $" + cxPrice(t.price) + " = " + cxUsd(t.usd) + (t.realized != null ? ' · <span class="' + (t.realized >= 0 ? "pz-up" : "pz-down") + '">' + cxUsd(t.realized) + "</span>" : "") + (t.live ? "" : " · simulated") + " · " + esc(t.reason) + "</div></div>";
+    }).join("");
+    h += '<div class="pz-meta"><span>Cycle ' + esc(cxWhen(cs.generatedAt)) + '</span><button type="button" data-pz="refresh">Refresh</button></div>';
+    h += '<p class="pz-foot">Kraken spot. ' + (cs.mode === "LIVE" ? "Real money inside the caps in rules/crypto.json. " : "Validate mode: every order is checked by Kraken and not sent; fills are simulated. ") + "The scanner ranks what is moving, the committee judges it, the guard sizes it. Decision support, not investment advice.</p>";
+    CRYPTO.innerHTML = h;
+  }
+  function loadCrypto() {
+    var cached = null;
+    try { cached = JSON.parse(localStorage.getItem(CRYPTO_CACHE_KEY) || "null"); } catch (e) {}
+    if (cached) { lastCrypto = cached; renderCrypto(cached); }
+    var list = cryptoSources(), i = 0;
+    (function next(problem) {
+      if (i >= list.length) { if (!cached) renderCrypto(null, problem); return; }
+      var url = list[i++], api = url.indexOf("api.github.com") !== -1;
+      fetch(url, { cache: "no-store", headers: api ? { Accept: "application/vnd.github.raw" } : {} })
+        .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function (cs) {
+          if (!cs || !cs.generatedAt || !cs.mode) throw new Error("not a crypto status file");
+          try { localStorage.setItem(CRYPTO_CACHE_KEY, JSON.stringify(cs)); } catch (e) {}
+          cached = cs; lastCrypto = cs; renderCrypto(cs);
+        })
+        .catch(function (err) { next(String(err && err.message || err)); });
+    })("");
+  }
+
   /* ---------- render + load ---------- */
   function render(s, fromCache, problem) {
     last = s; lastFromCache = fromCache;
@@ -3044,15 +3166,16 @@ Anything you can see in your broker app or from `npm run report` in the repo. Le
     else if (chip) { ui.chip = chip.getAttribute("data-pz-chip"); render(last, lastFromCache); }
     else if (pick) { ui.pick = pick.getAttribute("data-pz-pick"); render(last, lastFromCache); }
     else if (stock) openStock(stock.getAttribute("data-pz-stock"));
-    else if (act && act.getAttribute("data-pz") === "refresh") load();
+    else if (act && act.getAttribute("data-pz") === "refresh") { load(); loadCrypto(); }
   });
   /* typing must not rebuild the input (the keyboard would close): only the rows are redrawn */
   document.addEventListener("input", function (e) {
     if (e.target && e.target.id === "pz-q") { ui.q = e.target.value; if (last) $("pz-pick-rows").innerHTML = pickRows(last, model(last)); }
   });
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
-  window.altovixPulseReload = load;
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) { load(); loadCrypto(); } });
+  window.altovixPulseReload = function () { load(); loadCrypto(); };
   load();
+  loadCrypto();
 })();
 </script>
 <!-- PULSE:JS:END -->

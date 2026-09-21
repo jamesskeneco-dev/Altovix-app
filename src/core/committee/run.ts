@@ -8,7 +8,8 @@ import type { AgentSpec, PriorOutputs } from "../agents/types.ts";
 import type { DecisionOut } from "../agents/decision.ts";
 import type { JournalOut } from "../agents/journal.ts";
 import { saveClaims, type ClaimDraft } from "../calibration/claims.ts";
-import { buildContext, hashContext, type CommitteeContext } from "./context.ts";
+import { buildContext, hashContext, type AssetClass, type CommitteeContext } from "./context.ts";
+import { cryptoAddendum } from "../crypto/committee.ts";
 
 export interface RunProgress {
   agent: AgentName;
@@ -29,6 +30,8 @@ export interface RunOptions {
   /** Run only these agents. The chain order is preserved. */
   only?: AgentName[];
   operatorNotes?: string | null;
+  assetClass?: AssetClass;
+  benchmarks?: string[];
 }
 
 export interface CommitteeRunResult {
@@ -52,7 +55,7 @@ export async function runCommittee(
   opts: RunOptions = {},
 ): Promise<CommitteeRunResult> {
   const llm = opts.llm ?? makeClient();
-  const ctx = buildContext(conn, symbol, { asOf: opts.asOf, mandate: opts.mandate, operatorNotes: opts.operatorNotes });
+  const ctx = buildContext(conn, symbol, { asOf: opts.asOf, mandate: opts.mandate, operatorNotes: opts.operatorNotes, assetClass: opts.assetClass, benchmarks: opts.benchmarks });
   const started = Date.now();
 
   const { lastInsertRowid: runId } = exec(
@@ -77,7 +80,8 @@ export async function runCommittee(
     const agent = chain[i] as AgentSpec<never>;
     opts.onProgress?.({ agent: agent.name, title: agent.title, index: i, total: chain.length, phase: "start" });
 
-    const system = agent.system;
+    // Crypto runs carry an addendum per role; the prompt as sent is what gets persisted below.
+    const system = ctx.assetClass === "CRYPTO" ? `${agent.system}\n\n${cryptoAddendum(agent.name)}` : agent.system;
     const user = agent.buildUser(ctx, outputs);
     const model = MODEL_OVERRIDES[agent.name] ?? config.model;
 

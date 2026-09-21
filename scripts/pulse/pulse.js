@@ -11,9 +11,10 @@
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
-  var HOME = $("pulse-root"), NEEDS = $("needs-root"), PICKS = $("picks-root"), AGENTS = $("agents-root"), SHEET = $("pz-sheet");
+  var HOME = $("pulse-root"), NEEDS = $("needs-root"), PICKS = $("picks-root"), AGENTS = $("agents-root"), CRYPTO = $("crypto-root"), SHEET = $("pz-sheet");
   if (!HOME || !SHEET) return;
-  var NEW_PANELS = ["p-pulse", "p-needs", "p-picks", "p-agents"];
+  var NEW_PANELS = ["p-pulse", "p-needs", "p-picks", "p-agents", "p-crypto"];
+  var CRYPTO_CACHE_KEY = "altovix.crypto.v1";
   var CACHE_KEY = "altovix.pulse.v1";
   var DEFAULT_REPO = "jamesskeneco-dev/Altovix-app";
   /* company logos: one square PNG per ticker; a missing one falls back to the monogram underneath */
@@ -51,6 +52,16 @@
       "https://raw.githubusercontent.com/" + r + "/status/status.json?t=" + Date.now(),
       "https://api.github.com/repos/" + r + "/contents/status.json?ref=status&t=" + Date.now(),
       "./status.json?t=" + Date.now() /* the copy that ships with the site: older, but always there */
+    ];
+  }
+  function cryptoSources() {
+    var over = null;
+    try { over = localStorage.getItem("altovix.crypto.url"); } catch (e) {}
+    if (over) return [over];
+    var r = repo();
+    return [
+      "https://raw.githubusercontent.com/" + r + "/status/crypto-status.json?t=" + Date.now(),
+      "https://api.github.com/repos/" + r + "/contents/crypto-status.json?ref=status&t=" + Date.now()
     ];
   }
   function store() {
@@ -553,6 +564,92 @@
     }).join("");
   }
 
+
+  /* ---------- Crypto sleeve (fed by crypto-status.json from `npm run kraken -- run`) ---------- */
+  var lastCrypto = null;
+  function coin(sym) { return String(sym || "").split("-")[0]; }
+  function cxPrice(v) { if (v == null) return "–"; v = Number(v); return v >= 1000 ? num(v, 0) : v >= 1 ? num(v, 2) : v.toPrecision(4); }
+  function cxUsd(v) { return v == null ? "–" : (v < 0 ? "−" : "") + "$" + num(Math.abs(v)); }
+  function cxWhen(iso) { try { var d = new Date(iso); return MON[d.getMonth()] + " " + d.getDate() + " " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); } catch (e) { return ""; } }
+  function cxAvatar(sym) {
+    var tk = coin(sym), h = 0, i; for (i = 0; i < tk.length; i++) h = (h * 31 + tk.charCodeAt(i)) >>> 0;
+    return '<div class="pz-av" style="background:' + AV[h % AV.length] + '">' + esc(tk.slice(0, 4)) + "</div>";
+  }
+  function renderCrypto(cs, problem) {
+    if (!CRYPTO) return;
+    if (!cs) {
+      CRYPTO.innerHTML = '<h1 class="pz-title">Crypto</h1><p class="pz-lede">The Kraken sleeve: volatile coins the scanner finds, the committee judges, and the guard sizes.</p>' +
+        '<div class="pz-empty"><h2>Not running yet</h2><p>This fills in after the first <code>npm run kraken -- run</code> on your PC publishes its result.' + (problem ? "<br><small>" + esc(problem) + "</small>" : "") + '</p><button type="button" data-pz="refresh">Try again</button></div>';
+      return;
+    }
+    var modeCls = cs.killSwitch ? "kill" : cs.halted ? "halt" : cs.mode === "LIVE" ? "live" : "validate";
+    var modeTxt = cs.killSwitch ? "KILL SWITCH" : cs.halted ? "HALTED" : cs.mode === "LIVE" ? "LIVE · REAL MONEY" : "VALIDATE · NOTHING SENT";
+    var pnl = cs.dayPnl || {}, ageH = (Date.now() - new Date(cs.generatedAt).getTime()) / 36e5;
+    var h = '<h1 class="pz-title">Crypto <span class="pz-mode ' + modeCls + '">' + modeTxt + "</span></h1>" +
+      '<p class="pz-lede">' + esc(cs.summary || "") + "</p>";
+    if (ageH > 6) h += '<div class="pz-stale">The last crypto cycle ran ' + (ageH > 48 ? Math.round(ageH / 24) + " days" : Math.round(ageH) + " hours") + " ago. Is the PC on and altovix-crypto.cmd running?</div>";
+    if (cs.halted) h += '<div class="pz-stale">Halted ' + esc(cxWhen(cs.halted.at)) + ": " + esc(cs.halted.reason) + ". New buys resume on the next UTC day; stops still run.</div>";
+    h += '<div class="pz-cx-head"><div class="pz-cx-stat"><p class="k">Deployed</p><p class="v">' + cxUsd(cs.exposureUsd) + '</p><p class="s">of a ' + cxUsd(cs.sleeveUsd) + " sleeve</p></div>" +
+      '<div class="pz-cx-stat"><p class="k">Today</p><p class="v ' + ((pnl.total || 0) >= 0 ? "pz-up" : "pz-down") + '">' + cxUsd(pnl.total) + '</p><p class="s">' + cxUsd(pnl.realized) + " realised · " + cxUsd(pnl.unrealized) + " open</p></div></div>";
+
+    var pos = cs.positions || [];
+    h += '<div class="pz-h">Positions<small>' + pos.length + " open</small></div>";
+    h += pos.length ? pos.map(function (p) {
+      var lo = p.stop, hi = p.takeProfit, mark = p.mark == null ? p.avgCost : p.mark;
+      var at = function (v) { return Math.max(0, Math.min(100, (v - lo) / (hi - lo) * 100)); };
+      var trailOn = p.trail > p.stop;
+      return '<div class="pz-cx-pos"><div class="top">' + cxAvatar(p.symbol) + '<div><div class="nm">' + esc(coin(p.symbol)) + '</div><div class="nm2">' + esc(p.volume) + " @ $" + cxPrice(p.avgCost) + " · " + cxUsd(p.costUsd) + " · since " + esc(shortDay(String(p.openedAt).slice(0, 10))) + "</div></div>" +
+        '<div class="r"><div class="px">$' + cxPrice(mark) + '</div><div class="ch">' + change(p.unrealizedPct == null ? null : p.unrealizedPct * 100) + "</div></div></div>" +
+        '<div class="pz-cx-bar"><i style="left:' + at(mark).toFixed(1) + '%"></i>' + (trailOn ? '<b style="left:' + at(p.trail).toFixed(1) + '%" title="trailing stop"></b>' : "") + "</div>" +
+        '<div class="pz-cx-lbl"><span>stop <b>$' + cxPrice(p.stop) + "</b></span>" + (trailOn ? "<span>trail <b>$" + cxPrice(p.trail) + "</b></span>" : "<span>high <b>$" + cxPrice(p.highWater) + "</b></span>") + "<span>take profit <b>$" + cxPrice(p.takeProfit) + "</b></span></div>" +
+        (p.thesis ? '<p class="pz-cx-thesis">' + esc(firstSentence(p.thesis, 200)) + "</p>" : "") + "</div>";
+    }).join("") : '<div class="pz-empty-row">Nothing held. ' + (cs.mode === "LIVE" ? "The guard has not let a buy through yet." : "Validate mode: simulated fills would show here.") + "</div>";
+
+    var cands = (cs.candidates || []).filter(function (r) { return !r.excluded; }).slice(0, 10);
+    h += '<div class="pz-h">Scanner<small>top ' + cands.length + "</small></div>";
+    h += '<div class="pz-rows">' + (cands.length ? cands.map(function (r) {
+      var ret = r.ret1d == null ? null : r.ret1d * 100;
+      return '<div class="pz-row has-score">' + cxAvatar(r.symbol) + '<div><div class="nm">' + esc(coin(r.symbol)) + (r.setup && r.setup !== "NONE" ? '<span class="pz-tag t-setup">' + esc(r.setup.replace("_", " ")) + "</span>" : "") + '</div><div class="nm2 reasons">' + esc((r.reasons || []).slice(0, 3).join(" · ") || ("ATR " + ((r.atrPct14 || 0) * 100).toFixed(1) + "%/day · $" + ((r.volume24hUsd || 0) / 1e6).toFixed(1) + "M/24h")) + "</div></div>" +
+        '<div class="r"><div class="px">$' + cxPrice(r.price) + '</div><div class="ch">' + change(ret, 1) + "</div></div>" + scoreRing(r.score) + "</div>";
+    }).join("") : '<div class="pz-empty-row">Nothing above the liquidity floor scored.</div>') + "</div>";
+
+    var runs = cs.committeeRuns || [];
+    if (runs.length) h += '<div class="pz-h">Committee this cycle</div>' + runs.map(function (r) {
+      return '<div class="pz-cx-ev"><time>#' + esc(r.runId) + "</time><div><b>" + esc(coin(r.symbol)) + "</b> · " + esc(r.action || "no decision") + (r.confidence != null ? " · confidence " + Number(r.confidence).toFixed(2) : "") + (r.sizePct != null && r.action === "BUY" ? " · " + r.sizePct + "% of sleeve" : "") + "</div></div>";
+    }).join("");
+
+    var evs = (cs.events || []).filter(function (e) { return e.kind !== "INFO" || /halt|kill|not convened/i.test(e.message); }).slice(-12).reverse();
+    h += '<div class="pz-h">Journal<small>' + esc(cxWhen(cs.generatedAt)) + "</small></div>";
+    h += evs.length ? evs.map(function (e) {
+      return '<div class="pz-cx-ev ' + esc(String(e.kind).toLowerCase()) + '"><time>' + esc(String(e.kind)) + "</time><div>" + esc(e.message) + "</div></div>";
+    }).join("") : '<div class="pz-empty-row">Quiet cycle.</div>';
+    var trades = (cs.recentTrades || []).slice(0, 8);
+    if (trades.length) h += '<div class="pz-h">Recent fills</div>' + trades.map(function (t) {
+      return '<div class="pz-cx-ev ' + (t.side === "BUY" ? "entry" : "exit") + '"><time>' + esc(cxWhen(t.at)) + "</time><div><b>" + esc(t.side) + " " + esc(coin(t.symbol)) + "</b> " + esc(t.volume) + " @ $" + cxPrice(t.price) + " = " + cxUsd(t.usd) + (t.realized != null ? ' · <span class="' + (t.realized >= 0 ? "pz-up" : "pz-down") + '">' + cxUsd(t.realized) + "</span>" : "") + (t.live ? "" : " · simulated") + " · " + esc(t.reason) + "</div></div>";
+    }).join("");
+    h += '<div class="pz-meta"><span>Cycle ' + esc(cxWhen(cs.generatedAt)) + '</span><button type="button" data-pz="refresh">Refresh</button></div>';
+    h += '<p class="pz-foot">Kraken spot. ' + (cs.mode === "LIVE" ? "Real money inside the caps in rules/crypto.json. " : "Validate mode: every order is checked by Kraken and not sent; fills are simulated. ") + "The scanner ranks what is moving, the committee judges it, the guard sizes it. Decision support, not investment advice.</p>";
+    CRYPTO.innerHTML = h;
+  }
+  function loadCrypto() {
+    var cached = null;
+    try { cached = JSON.parse(localStorage.getItem(CRYPTO_CACHE_KEY) || "null"); } catch (e) {}
+    if (cached) { lastCrypto = cached; renderCrypto(cached); }
+    var list = cryptoSources(), i = 0;
+    (function next(problem) {
+      if (i >= list.length) { if (!cached) renderCrypto(null, problem); return; }
+      var url = list[i++], api = url.indexOf("api.github.com") !== -1;
+      fetch(url, { cache: "no-store", headers: api ? { Accept: "application/vnd.github.raw" } : {} })
+        .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function (cs) {
+          if (!cs || !cs.generatedAt || !cs.mode) throw new Error("not a crypto status file");
+          try { localStorage.setItem(CRYPTO_CACHE_KEY, JSON.stringify(cs)); } catch (e) {}
+          cached = cs; lastCrypto = cs; renderCrypto(cs);
+        })
+        .catch(function (err) { next(String(err && err.message || err)); });
+    })("");
+  }
+
   /* ---------- render + load ---------- */
   function render(s, fromCache, problem) {
     last = s; lastFromCache = fromCache;
@@ -597,13 +694,14 @@
     else if (chip) { ui.chip = chip.getAttribute("data-pz-chip"); render(last, lastFromCache); }
     else if (pick) { ui.pick = pick.getAttribute("data-pz-pick"); render(last, lastFromCache); }
     else if (stock) openStock(stock.getAttribute("data-pz-stock"));
-    else if (act && act.getAttribute("data-pz") === "refresh") load();
+    else if (act && act.getAttribute("data-pz") === "refresh") { load(); loadCrypto(); }
   });
   /* typing must not rebuild the input (the keyboard would close): only the rows are redrawn */
   document.addEventListener("input", function (e) {
     if (e.target && e.target.id === "pz-q") { ui.q = e.target.value; if (last) $("pz-pick-rows").innerHTML = pickRows(last, model(last)); }
   });
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
-  window.altovixPulseReload = load;
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) { load(); loadCrypto(); } });
+  window.altovixPulseReload = function () { load(); loadCrypto(); };
   load();
+  loadCrypto();
 })();

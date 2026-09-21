@@ -7,8 +7,9 @@ import { stooq } from "./stooq.ts";
 import { yahoo } from "./yahoo.ts";
 import { csvProvider } from "./csv.ts";
 import { schwab } from "./schwab.ts";
+import { kraken } from "./kraken.ts";
 
-export { stooq, yahoo, csvProvider, schwab };
+export { stooq, yahoo, csvProvider, schwab, kraken };
 export type { PriceProvider };
 
 const PROVIDERS: Record<string, PriceProvider> = {
@@ -16,6 +17,7 @@ const PROVIDERS: Record<string, PriceProvider> = {
   stooq,
   yahoo,
   csv: csvProvider,
+  kraken,
 };
 
 export function getProvider(name: string = config.marketProvider): PriceProvider {

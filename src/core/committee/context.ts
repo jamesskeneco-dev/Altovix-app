@@ -7,6 +7,7 @@ import { latestDate, loadSeries } from "../market/index.ts";
 import { symbolFeatures, relativeFeatures, round, type SymbolFeatures, type RelativeFeatures } from "../indicators/features.ts";
 import { positions, cashBalance } from "../portfolio/lots.ts";
 import { simpleReturns, correlation } from "../indicators/index.ts";
+import { isCryptoSymbol } from "../market/kraken.ts";
 
 export interface SectorRow extends SymbolFeatures {
   rs21: number | null;
@@ -31,10 +32,16 @@ export interface PriorRunSummary {
   final_confidence: number | null;
 }
 
+export type AssetClass = "EQUITY" | "CRYPTO";
+
 export interface CommitteeContext {
   asOfDate: string;
   symbol: string;
   mandate: Mandate;
+  /** CRYPTO runs get the crypto addenda to every agent's brief (src/core/crypto/committee.ts). */
+  assetClass: AssetClass;
+  /** What the candidate was measured against in `candidateVs` (SPY/QQQ, or BTC/ETH for crypto). */
+  benchmarks: string[];
   candidate: SymbolFeatures;
   candidateVs: RelativeFeatures[];
   macro: SymbolFeatures[];
@@ -49,9 +56,11 @@ export interface CommitteeContext {
 export function buildContext(
   conn: DatabaseSync,
   symbol: string,
-  opts: { asOf?: string; mandate?: Mandate; operatorNotes?: string | null } = {},
+  opts: { asOf?: string; mandate?: Mandate; operatorNotes?: string | null; assetClass?: AssetClass; benchmarks?: string[] } = {},
 ): CommitteeContext {
   const sym = symbol.toUpperCase();
+  const assetClass: AssetClass = opts.assetClass ?? (isCryptoSymbol(sym) ? "CRYPTO" : "EQUITY");
+  const benchmarks = opts.benchmarks ?? (assetClass === "CRYPTO" ? [...config.cryptoBenchmarks] : [...config.benchmarks]);
   const asOf = opts.asOf ?? latestDate(conn) ?? new Date().toISOString().slice(0, 10);
   const dataGaps: string[] = [];
 
@@ -59,7 +68,7 @@ export function buildContext(
   if (candidate.bars === 0) dataGaps.push(`no price history for ${sym}`);
   else if (candidate.bars < 252) dataGaps.push(`${sym} has only ${candidate.bars} bars; 1-year stats unavailable`);
 
-  const candidateVs = config.benchmarks.map((b) => round(relativeFeatures(conn, sym, b, asOf) as unknown as Record<string, unknown>) as unknown as RelativeFeatures);
+  const candidateVs = benchmarks.map((b) => round(relativeFeatures(conn, sym, b, asOf) as unknown as Record<string, unknown>) as unknown as RelativeFeatures);
 
   const macro: SymbolFeatures[] = [];
   for (const t of config.macroTickers) {
@@ -69,9 +78,10 @@ export function buildContext(
   }
 
   const sectors: SectorRow[] = [];
-  for (const t of config.sectorEtfs) {
+  const sectorSymbols = assetClass === "CRYPTO" ? benchmarks.filter((b) => b !== sym) : config.sectorEtfs;
+  for (const t of sectorSymbols) {
     const f = symbolFeatures(conn, t, asOf);
-    if (f.bars === 0) { dataGaps.push(`sector ETF ${t} missing`); continue; }
+    if (f.bars === 0) { dataGaps.push(`${assetClass === "CRYPTO" ? "crypto benchmark" : "sector ETF"} ${t} missing`); continue; }
     const rel = relativeFeatures(conn, t, "SPY", asOf);
     sectors.push({ ...round(f), rs21: rel.rs21, rs63: rel.rs63 });
   }
@@ -109,7 +119,7 @@ export function buildContext(
 
   const mandate: Mandate = opts.mandate ?? (existing ? "REVIEW" : "NEW_POSITION");
   return {
-    asOfDate: asOf, symbol: sym, mandate, candidate, candidateVs, macro, sectors, portfolio, priorRuns, dataGaps,
+    asOfDate: asOf, symbol: sym, mandate, assetClass, benchmarks, candidate, candidateVs, macro, sectors, portfolio, priorRuns, dataGaps,
     operatorNotes: opts.operatorNotes?.trim() ? opts.operatorNotes.trim() : null,
   };
 }

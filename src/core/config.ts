@@ -32,7 +32,7 @@ export const config = {
   llmMode: env("ALTOVIX_LLM", "mock") as "real" | "mock",
   apiKey: process.env["ANTHROPIC_API_KEY"] ?? "",
   model: env("ALTOVIX_MODEL", "claude-sonnet-4-6"),
-  marketProvider: env("ALTOVIX_MARKET_PROVIDER", "stooq") as "schwab" | "stooq" | "yahoo" | "csv",
+  marketProvider: env("ALTOVIX_MARKET_PROVIDER", "stooq") as "schwab" | "stooq" | "yahoo" | "csv" | "kraken",
   csvDir: env("ALTOVIX_CSV_DIR", "./data/prices"),
   benchmarks: env("ALTOVIX_BENCHMARKS", "SPY,QQQ")
     .split(",")
@@ -45,6 +45,15 @@ export const config = {
   ],
   /** Macro context tickers. Free daily sources cover these as ETFs/indices. */
   macroTickers: ["SPY", "QQQ", "IWM", "TLT", "HYG", "LQD", "UUP", "USO", "GLD", "^VIX"],
+  /** Crypto committee runs measure the candidate against these instead of SPY/QQQ. */
+  cryptoBenchmarks: env("ALTOVIX_CRYPTO_BENCHMARKS", "BTC-USD,ETH-USD")
+    .split(",")
+    .map((s) => s.trim().toUpperCase())
+    .filter(Boolean),
+  /** Where the crypto sleeve's rules and state live. */
+  cryptoRules: env("ALTOVIX_CRYPTO_RULES", "./rules/crypto.json"),
+  cryptoState: env("ALTOVIX_CRYPTO_STATE", "./data/crypto-state.json"),
+  cryptoStatus: env("ALTOVIX_CRYPTO_STATUS", "./data/crypto-status.json"),
 } as const;
 
 export type Config = typeof config;

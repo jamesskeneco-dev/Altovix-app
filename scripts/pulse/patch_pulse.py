@@ -42,6 +42,7 @@ NAV = ("<!--PZNAV-->"
        + tab("needs", "NEEDS YOU", '<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/>', ' <span class="pz-count" id="pz-needs-count"></span>')
        + tab("picks", "SEARCH", '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>')
        + tab("agents", "AGENTS", '<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.800 6 5"/><circle cx="17.5" cy="9.500" r="2.500"/><path d="M17 14.600c2.200.200 3.600 1.700 4 4.400"/>')
+       + tab("crypto", "CRYPTO", '<circle cx="12" cy="12" r="8.5"/><path d="M9.5 8h3.2a2 2 0 0 1 0 4H9.5zM9.5 12h3.7a2 2 0 0 1 0 4H9.5zM11 6.5V8M11 16v1.5"/>')
        + "<!--/PZNAV-->")
 NAV = NAV.replace("1.800", "1.8").replace("9.500", "9.5").replace("2.500", "2.5").replace("14.600", "14.6").replace(".200 3.600 1.700", ".2 3.6 1.7")
 if "<!--PZNAV-->" in s:
@@ -59,9 +60,9 @@ else:
 for name in ("lists", "committee", "calibration", "book"):
     s = re.sub(r'<button class="tab( desk-only)?" role="tab" aria-selected="false" data-tab="%s">' % name,
                lambda m: '<button class="tab%s pz-legacy-tab" role="tab" aria-selected="false" data-tab="%s">' % (m.group(1) or "", name), s)
-s = re.sub(r'\[(?:"pulse", )?(?:"needs", "picks", "agents", )?"desk", "lists", "dash", "committee", "calibration", "book", "method"\]\.forEach\(function \(t\) \{',
-           '["pulse", "needs", "picks", "agents", "desk", "lists", "dash", "committee", "calibration", "book", "method"].forEach(function (t) {', s)
-assert '["pulse", "needs", "picks", "agents", "desk"' in s, "switchTab list not patched"
+s = re.sub(r'\[(?:"pulse", )?(?:"needs", "picks", "agents", )?(?:"crypto", )?"desk", "lists", "dash", "committee", "calibration", "book", "method"\]\.forEach\(function \(t\) \{',
+           '["pulse", "needs", "picks", "agents", "crypto", "desk", "lists", "dash", "committee", "calibration", "book", "method"].forEach(function (t) {', s)
+assert '["pulse", "needs", "picks", "agents", "crypto", "desk"' in s, "switchTab list not patched"
 
 index.write_text(s, encoding="utf8")
 print(f"patched {index} ({len(s):,} bytes)")

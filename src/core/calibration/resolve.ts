@@ -2,6 +2,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { all } from "../db.ts";
 import { drawdown, realizedVol, simpleReturns } from "../indicators/index.ts";
 import { type ClaimRow, openClaimsDue, settleClaim } from "./claims.ts";
+import { isCryptoSymbol } from "../market/kraken.ts";
 
 export const BENCH = "SPY";
 
@@ -57,6 +58,34 @@ export function forwardWindow(
   };
 }
 
+/**
+ * The benchmark over the same CALENDAR span as a subject's window. Crypto trades seven days a
+ * week, so "21 bars" of SOL-USD is three calendar weeks while 21 bars of SPY is four; comparing
+ * them bar-for-bar would hand crypto claims a shorter benchmark window than they were judged over.
+ */
+export function windowTo(conn: DatabaseSync, symbol: string, madeOn: string, endDate: string): ForwardWindow | null {
+  const startRow = all<{ date: string; close: number }>(
+    conn, `SELECT date, close FROM prices WHERE symbol = ? AND date <= ? ORDER BY date DESC LIMIT 1`, symbol.toUpperCase(), madeOn,
+  )[0];
+  if (!startRow) return null;
+  const fwd = all<{ date: string; close: number }>(
+    conn, `SELECT date, close FROM prices WHERE symbol = ? AND date > ? AND date <= ? ORDER BY date ASC`, symbol.toUpperCase(), startRow.date, endDate,
+  );
+  if (!fwd.length) return null;
+  const closes = [startRow.close, ...fwd.map((r) => r.close)];
+  const endRow = fwd[fwd.length - 1] as { date: string; close: number };
+  return {
+    symbol: symbol.toUpperCase(), startDate: startRow.date, endDate: endRow.date, startClose: startRow.close, endClose: endRow.close,
+    bars: fwd.length, ret: startRow.close === 0 ? 0 : endRow.close / startRow.close - 1,
+    maxDrawdown: drawdown(closes).maxDrawdown, realizedVol: realizedVol(closes, Math.min(20, Math.max(2, closes.length - 1))),
+  };
+}
+
+export function benchmarkWindow(conn: DatabaseSync, subject: string, win: ForwardWindow, madeOn: string, horizonDays: number): ForwardWindow | null {
+  if (subject === BENCH) return win;
+  return isCryptoSymbol(subject) ? windowTo(conn, BENCH, madeOn, win.endDate) : forwardWindow(conn, BENCH, madeOn, horizonDays);
+}
+
 export interface Resolution {
   outcome: 0 | 1 | null;   // null = void
   note: string;
@@ -74,7 +103,7 @@ export function resolveMechanical(conn: DatabaseSync, claim: ClaimRow): Resoluti
   const win = forwardWindow(conn, subject, claim.made_on, claim.horizon_days);
   if (!win) return NOT_READY;
 
-  const benchWin = subject === BENCH ? win : forwardWindow(conn, BENCH, claim.made_on, claim.horizon_days);
+  const benchWin = benchmarkWindow(conn, subject, win, claim.made_on, claim.horizon_days);
   const excess = benchWin ? win.ret - benchWin.ret : null;
   const base = {
     window: `${win.startDate} -> ${win.endDate} (${win.bars} bars)`,
@@ -188,7 +217,7 @@ export function resolveDue(conn: DatabaseSync, asOf: string): ResolveSummary {
 export function evidenceFor(conn: DatabaseSync, claim: ClaimRow): Record<string, unknown> | null {
   const win = forwardWindow(conn, claim.subject, claim.made_on, claim.horizon_days);
   if (!win) return null;
-  const bench = forwardWindow(conn, BENCH, claim.made_on, claim.horizon_days);
+  const bench = benchmarkWindow(conn, claim.subject.toUpperCase(), win, claim.made_on, claim.horizon_days);
   const path = all<{ date: string; close: number }>(
     conn,
     `SELECT date, close FROM prices WHERE symbol = ? AND date >= ? AND date <= ? ORDER BY date`,

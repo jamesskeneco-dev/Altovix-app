@@ -55,7 +55,8 @@ machinery, not to say anything about markets.
 | `npm run calibrate [-- --mechanical-only]` | Settle claims that have come due and rebuild the scorecard |
 | `npm run snapshot [-- --rebuild]` | Daily portfolio snapshot / rebuild the whole equity curve |
 | `npm run report [-- --run 12]` | Terminal dashboard, or one committee run's full transcript |
-| `npm test` | 59 tests over the indicators, tax lots, wash sales, the chain, and the calibration maths |
+| `npm run kraken -- <command>` | The crypto sleeve on Kraken: scanner, committee, guarded orders - see below |
+| `npm test` | 127 tests over the indicators, tax lots, wash sales, the chain, the calibration maths, the market check, Schwab, Kraken and the crypto guard |
 | `node --experimental-strip-types scripts/session-committee.ts --stage regime --symbols NVDA,JPM` | Print an agent's exact prompts for a set of symbols, so any model (or a person) can answer them offline |
 | `... --commit --symbols NVDA,JPM` | Replay saved answers through the real orchestrator: schema-validated, persisted, claims recorded |
 
@@ -93,6 +94,50 @@ written by the script. One-time: `altovix-publish-setup.cmd` asks for a GitHub k
 stores it outside the repo (`%LOCALAPPDATA%\Altovix\github-token.txt`). The repo is public, so is `status.json`.
 The screens live in `scripts/pulse/` (`pulse.css`, `pulse.html`, `pulse.js`); `python scripts/pulse/patch_pulse.py`
 splices them into `index.html` between markers and can be re-run after any edit.
+
+### The crypto sleeve (Kraken, real money, hard caps)
+
+A separate, small sleeve that hunts volatile spot pairs on Kraken and lets the committee buy and sell
+them **inside limits the code will not cross**. `rules/crypto.json` is the whole contract:
+
+| Rule | Shipped value | What it does |
+|---|---|---|
+| `live` | **false** | `false`: every order is *validated* by Kraken (same checks as a real order) and **not sent**; fills are simulated into `data/crypto-paper-state.json`. `true`: orders go out; state in `data/crypto-state.json` |
+| `sleeveUsd` / `maxOrderUsd` / `maxPositionUsd` / `maxPositions` | $400 / $100 / $120 / 4 | the ceilings; the guard cuts any size down to them and refuses what is left over |
+| `maxDailyLossUsd` | $40 | realised + unrealised loss on the UTC day that halts new buys until the next UTC day |
+| `maxDailyBuys`, `cooldownHours` | 4, 12 | no churn: at most four entries a day, never the same pair twice inside 12 hours |
+| `minConfidence` | 0.58 | a Decision below this is recorded and ignored |
+| `stopPct` / `trailPct` / `takeProfitPct` / `maxHoldDays` | 12% / 15% / +40% / 21 | mechanical exits, checked every cycle at the live price, sold at market |
+| `minVolume24hUsd`, `excludeAssets` | $3M, stablecoins/wrapped/fiat | what the scanner may even look at |
+| `killSwitchFile` | `data/crypto-KILL` | `npm run kraken -- kill` blocks every new buy on the next cycle; protective exits still run |
+
+One cycle (`npm run kraken -- run --once`, or double-click `altovix-crypto.cmd`):
+
+1. **Mark** open positions at the live ticker; ratchet each high-water mark.
+2. **Exits** - stop, trailing stop, take-profit, max hold: a market sell, live or validated, before anything else is considered.
+3. **Scan** the USD pairs above the liquidity floor (`src/core/crypto/scan.ts`): ATR%, volume surge vs the 20-day average,
+   distance to the 20-day high, RSI, range position, drawdown from the 90-day high. Score 0-100 rewards volatility that is
+   *expanding on volume near a fresh high* and penalises what already went vertical (RSI > 85, +25% day). `npm run kraken -- scan` shows it.
+4. **Committee** on the top `maxCommitteeRunsPerCycle` names scoring 45+ - the same eight agents, same schemas, same claims and
+   calibration, plus a versioned crypto brief per role (`src/core/crypto/committee.ts`) and operator notes carrying the scanner
+   read and the sleeve's caps. BTC and ETH stand in for the sector table; SPY stays the scoring benchmark (the honest bar for real money).
+5. **Guard** (`src/core/crypto/guard.ts`): a BUY passes only if the kill switch is off, the sleeve is not halted, confidence,
+   liquidity, daily-buy and daily-loss limits hold, the pair is out of cooldown, and there is room under the position and sleeve caps.
+   Entries are limit-IOC just above the ask (slippage capped at `entrySlippagePct`), never a bare market buy.
+6. **Record**: `data/crypto-journal.jsonl` (every event), the state file, `data/crypto-status.json` for the app, and a phone alert
+   (ntfy, same topic as the market check) for every fill and every halt.
+
+Commands: `status` · `scan` · `quote SOL BTC` · `balance` · `history SOL --ingest` · `committee SOL [--mock]` ·
+`order buy SOL 50 [--live]` / `order sell SOL [--live]` · `run [--once | --loop 3600] [--no-committee] [--mock]` · `positions` · `kill` / `resume`.
+
+Setting up: create a Kraken API key with **Query Funds, Query Orders & Trades, Create & Modify Orders - and nothing else, never
+Withdraw**; put it in `.env`; `npm run kraken -- status`; run in validate mode for a while and read the journal; then, and only
+then, set `live: true`. The committee runs cost real model calls (about 20-30 cents each with the default models); `--mock` dry-runs
+the whole cycle for free with random agents whose runs never enter a scorecard. Claims on crypto pairs resolve against SPY over the
+same *calendar* span (crypto has seven bars a week), see `benchmarkWindow` in `src/core/calibration/resolve.ts`.
+
+What it will not do: leverage, margin, shorting, withdrawals (the client has no withdrawal call and the key must not have the
+permission), or anything with `live=false`. Kraken's spot forex pairs are not offered to US clients, so there is no forex here.
 
 ### Schwab market data (optional)
 
@@ -138,7 +183,8 @@ fact, so the integrity boundary is at *scoring* time, not at write time.
 
 ## What it deliberately does not do
 
-- **No automated trading.** It records what you did; it does not touch a broker.
+- **No automated trading of equities.** The stock Book records what you did; the Schwab client cannot place orders.
+  The crypto sleeve is the one exception, and it is fenced: `rules/crypto.json` caps, validate-only by default, a kill switch.
 - **No news, filings or fundamentals.** Agents get price and volume only, and are instructed
   to name the gap rather than invent a figure. `knowledgeLimits` is a required field.
 - **Wash-sale detection is same-ticker, same-account.** It does not model substantially
@@ -152,7 +198,9 @@ fact, so the integrity boundary is at *scoring* time, not at write time.
 ```
 db/schema.sql            the whole data model, commented
 src/core/indicators/     pure maths - the only place numbers are computed
-src/core/market/         provider interface + Schwab (OAuth, quotes, history, read-only accounts), Stooq, Yahoo and CSV adapters
+src/core/market/         provider interface + Schwab (OAuth, quotes, history, read-only accounts), Kraken (spot data, balances, orders), Stooq, Yahoo and CSV adapters
+src/core/crypto/         the crypto sleeve: scanner, guard (caps + state), crypto committee brief, the cycle
+rules/crypto.json        the sleeve's caps and the live switch
 src/core/portfolio/      tax lots, wash sales, snapshots, performance metrics
 src/core/llm/            fetch-based Anthropic client, JSON-schema validator, offline mock
 src/core/agents/         one file per committee role: prompt, schema, claims

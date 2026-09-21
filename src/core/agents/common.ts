@@ -7,7 +7,7 @@ export const SECTOR_COLUMNS = ["symbol", "ret21d", "ret63d", "rs21", "rs63", "pc
 export function header(ctx: CommitteeContext): string {
   return [
     `As-of trading date: ${ctx.asOfDate}`,
-    `Candidate: ${ctx.symbol}`,
+    `Candidate: ${ctx.symbol}${ctx.assetClass === "CRYPTO" ? " (CRYPTO spot pair, trades 24/7; bars are UTC days)" : ""}`,
     `Mandate: ${ctx.mandate}`,
     ctx.dataGaps.length ? `DATA GAPS (treat as unknown, do not fill in): ${ctx.dataGaps.join("; ")}` : "Data gaps: none",
     ...(ctx.operatorNotes
@@ -21,6 +21,9 @@ export function macroBlock(ctx: CommitteeContext): string {
 }
 
 export function sectorBlock(ctx: CommitteeContext): string {
+  if (ctx.assetClass === "CRYPTO") {
+    return `CRYPTO MAJORS vs SPY (the "sector" for a crypto candidate is BTC and ETH; rs21/rs63 = excess return over SPY)\n${table(ctx.sectors, SECTOR_COLUMNS)}`;
+  }
   return `SECTOR ETFs vs SPY (rs21/rs63 = excess return over SPY on that window)\n${table(ctx.sectors, SECTOR_COLUMNS)}`;
 }
 
