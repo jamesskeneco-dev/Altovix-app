@@ -95,6 +95,13 @@ stores it outside the repo (`%LOCALAPPDATA%\Altovix\github-token.txt`). The repo
 The screens live in `scripts/pulse/` (`pulse.css`, `pulse.html`, `pulse.js`); `python scripts/pulse/patch_pulse.py`
 splices them into `index.html` between markers and can be re-run after any edit.
 
+**How it launches fast (1.2.0).** The page is ~240 KB: the shipped committee runs, claims and plans live in `seed.json`
+(fetched once per device, then only when its version changes - `python scripts/pulse/patch_fast.py` keeps that split
+and the other speed patches in place). `sw.js` serves the saved page at once and fetches the live one behind it; if a
+newer build arrived, an "Update ready" pill appears (the next launch gets it anyway). `status.json` is never served from
+that cache; the app keeps its own last copy and refetches at most once a minute, redrawing only when the check
+published something new. The old Desk screens draw in idle time, and the phone screens use the system font.
+
 ### The crypto sleeve (Kraken, real money, hard caps)
 
 A separate, small sleeve that hunts volatile spot pairs on Kraken and lets the committee buy and sell
@@ -207,9 +214,10 @@ src/core/agents/         one file per committee role: prompt, schema, claims
 src/core/committee/      context builder and the chain orchestrator
 src/core/calibration/    claims, mechanical resolvers, Brier scoring
 src/cli/                 the commands above
-index.html, sw.js, manifest.webmanifest, icons/
+index.html, seed.json, sw.js, manifest.webmanifest, icons/
                          the Altovix app: a standalone page (on-device data, your own API key,
-                         installs from Safari), served by GitHub Pages from the repo root — see app/README.md
+                         installs from Safari), served by GitHub Pages from the repo root — see app/README.md;
+                         seed.json is the shipped data the page used to carry inline
 app/ios/                 the native iOS shell (Expo) that wraps it for TestFlight
 web/                     the hosted Altovix Terminal page (phone-first; runs on claude.ai artifacts)
 web/altovix-widget.scriptable.js   iOS home-screen widget (Scriptable); built by `npm run build:widget`

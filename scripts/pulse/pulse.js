@@ -64,11 +64,18 @@
       "https://api.github.com/repos/" + r + "/contents/crypto-status.json?ref=status&t=" + Date.now()
     ];
   }
+  /* the app's store is half a megabyte of JSON: parse it once, and again only when the app says it changed */
+  var storeCache = null, modelCache = null;
+  function forget() { storeCache = null; modelCache = null; }
+  document.addEventListener("altovix:data", function () { forget(); if (last) render(last, lastFromCache); });
+  window.addEventListener("storage", function (e) { if (!e.key || e.key === "altovix.v1") forget(); });
   function store() {
+    if (storeCache) return storeCache;
     var d = null;
     try { d = JSON.parse(localStorage.getItem("altovix.v1") || "null"); } catch (e) {}
     if (!d || !d.runs || !d.runs.length) { try { d = JSON.parse(($("altovix-seed") || {}).textContent || "null"); } catch (e2) {} }
-    return { runs: (d && d.runs) || [], claims: (d && d.claims) || [] };
+    storeCache = { runs: (d && d.runs) || [], claims: (d && d.claims) || [] };
+    return storeCache;
   }
   function latestRunBySymbol(runs) {
     var out = {};
@@ -111,7 +118,7 @@
     var h = 0, i; for (i = 0; i < tk.length; i++) h = (h * 31 + tk.charCodeAt(i)) >>> 0;
     var ico = light === "GREEN" ? "good" : light === "YELLOW" ? "warn" : light === "RED" ? "crit" : null;
     return '<div class="pz-av" style="background:' + AV[h % AV.length] + '">' + esc(tk.slice(0, 4)) +
-      '<img class="pz-logo" alt="" loading="lazy" referrerpolicy="no-referrer" src="' + LOGOS + encodeURIComponent(tk) + '.png" onerror="this.remove()">' +
+      '<img class="pz-logo" alt="" width="52" height="52" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + LOGOS + encodeURIComponent(tk) + '.png" onerror="this.remove()">' +
       (ico ? '<span class="pz-badge"><i class="pz-ico ' + ico + '"></i></span>' : "") + "</div>";
   }
   function scoreRing(score) {
@@ -123,8 +130,17 @@
   var TAG = { SELL: "t-sell", BUY: "t-buy", WATCH: "t-watch", HOLDING: "t-hold", SOLD: "t-grey", AVOID: "t-grey", TODAY: "t-note", "HEADS-UP": "t-watch", NOTE: "t-note" };
   function tag(label, asset) { return '<span class="pz-tag ' + (TAG[label] || "t-note") + (label === "BUY" && asset === "forex" ? " t-fx" : "") + '">' + label + "</span>"; }
 
-  /* ---------- one model for all four screens ---------- */
+  /* ---------- one model for all four screens (built once per status file) ---------- */
+  /* a held name whose stop fired: "due" until the paper exit is priced, "sold" once it is (it stays in the
+     holdings until rules/book.json on the PC moves it to closed - the app must not call that a Hold) */
+  function exitState(p) { return p && p.exit ? (p.exit.paperExitPrice == null ? "due" : "sold") : null; }
   function model(s) {
+    if (modelCache && modelCache.s === s) return modelCache.m;
+    var m = buildModel(s);
+    modelCache = { s: s, m: m };
+    return m;
+  }
+  function buildModel(s) {
     var st = store(), runs = latestRunBySymbol(st.runs);
     function scoreOf(tk, agent) {
       var a = agent || (s.agentScores && s.agentScores[tk]);
@@ -150,8 +166,12 @@
       picks[tk] = { ticker: tk, status: status, sub: sub, also: cur && cur.also, score: scoreOf(tk, extra && extra.agent), price: extra && extra.price, pnl: extra && extra.pnl };
     }
     held.forEach(function (p) {
-      var due = p.exit && p.exit.paperExitPrice == null;
-      put(p.ticker, due ? "SELL" : "HOLDING", due ? "Stop hit " + shortDay(p.exit.date) + " · sell at the next open" : (p.cushionPct == null ? "" : num(p.cushionPct, 1) + "% above stop $" + num(p.stop)), { agent: p.agent, price: p.lastClose, pnl: p.pnlPct });
+      var ex = exitState(p);
+      put(p.ticker, ex === "due" ? "SELL" : ex === "sold" ? "SOLD" : "HOLDING",
+        ex === "due" ? "Stop hit " + shortDay(p.exit.date) + " · sell at the next open"
+          : ex === "sold" ? "Stop hit " + shortDay(p.exit.date) + " · sold " + shortDay(p.exit.paperExitDate) + " at $" + num(p.exit.paperExitPrice)
+          : (p.cushionPct == null ? "" : num(p.cushionPct, 1) + "% above stop $" + num(p.stop)),
+        { agent: p.agent, price: p.lastClose, pnl: p.pnlPct });
     });
     (s.triggers || []).forEach(function (t) {
       if (t.level == null) return;
@@ -169,7 +189,13 @@
     var list = Object.keys(picks).map(function (k) { return picks[k]; }).sort(function (a, b) { return (order[a.status] - order[b.status]) || ((b.score ? b.score.v : -1) - (a.score ? a.score.v : -1)); });
     return { held: held, needs: needs, picks: list, runs: runs, allRuns: st.runs, claims: st.claims, scoreOf: scoreOf };
   }
-  function nameOf(s, tk) { return cleanName(s.names && s.names[tk]); }
+  /* Schwab's descriptions are cut at 20 characters ("HUNTINGTON INGALLS I"); the names people use come first */
+  var NAMES = { HII: "Huntington Ingalls", XOM: "Exxon Mobil", GOOGL: "Alphabet", NPK: "National Presto", MSFT: "Microsoft", NVDA: "NVIDIA",
+    RGR: "Sturm Ruger", DCO: "Ducommun", JPM: "JPMorgan Chase", BWXT: "BWX Technologies", CDRE: "Cadre Holdings", RCAT: "Red Cat Holdings",
+    KTOS: "Kratos Defense", AVAV: "AeroVironment", POWL: "Powell Industries", KRMN: "Karman Holdings", AMZN: "Amazon", LLY: "Eli Lilly",
+    COST: "Costco", CAT: "Caterpillar", MRCY: "Mercury Systems", META: "Meta Platforms", LEU: "Centrus Energy", CW: "Curtiss-Wright",
+    SPY: "S&P 500 ETF", ITA: "Aerospace & Defense ETF", HYG: "High Yield Bond ETF" };
+  function nameOf(s, tk) { return NAMES[tk] || cleanName(s.names && s.names[tk]); }
 
   /* ---------- Home ---------- */
   function renderHome(s, m, fromCache) {
@@ -184,7 +210,7 @@
     h += '<div class="pz-head"><div><p class="pz-k">Book value</p><p class="pz-total">$' + whole + "<small>" + cents + "</small></p>" +
       '<p class="pz-delta">' + change(bk.sinceStartPct) + '<span class="pz-mute">since Sep 4</span></p></div>' +
       '<div class="pz-score" aria-label="Opportunity score ' + (s.opportunity || 0) + ' of 100"><div class="pz-ring">' + ring(s.opportunity || 0, b.colour) + "<b>" + (s.opportunity || 0) + "</b></div><span>Opportunity</span></div></div>";
-    if (stale) h += '<div class="pz-stale">The last check ran ' + Math.round(ageH / 24) + " day(s) ago. Is the PC on, and is the weekly Schwab login current?</div>";
+    if (stale) h += '<div class="pz-stale"><b>These numbers are ' + Math.round(ageH / 24) + " day" + (Math.round(ageH / 24) === 1 ? "" : "s") + " old.</b> The PC check has not published since " + esc(shortDay(s.asOf)) + ". Is the PC on, and is the Schwab login current? (It expires every 7 days: run schwab-login.cmd.)</div>";
     h += '<div class="pz-banner"><div><h2>' + b.name + "</h2><p>" + esc(s.opportunityWhy || "") + '</p></div><span class="pz-dot" style="background:' + b.colour + '"></span></div>';
     h += '<div class="pz-h">Holdings<small>score</small></div>';
     h += '<div class="pz-chips">' + [["all", "All", m.held.length, ""], ["GREEN", "Healthy", L.green, "good"], ["YELLOW", "Near stop", L.yellow, "warn"], ["RED", "Exit", L.red, "crit"]].map(function (x) {
@@ -192,12 +218,13 @@
     }).join("") + "</div>";
     var rows = m.held.filter(function (p) { return ui.chip === "all" || p.light === ui.chip; });
     h += '<div class="pz-rows">' + (rows.length ? rows.map(function (p) {
-      var sc = m.scoreOf(p.ticker, p.agent);
-      return '<div class="pz-row has-score" data-pz-stock="' + esc(p.ticker) + '">' + avatar(p.ticker, p.light) + '<div><div class="nm">' + esc(p.ticker) + '</div><div class="nm2">' + esc(nameOf(s, p.ticker) || (p.exit ? "Sell at the next open" : num(p.cushionPct, 1) + "% above stop")) + "</div></div>" +
+      var sc = m.scoreOf(p.ticker, p.agent), ex = exitState(p);
+      var sub = ex === "due" ? "Stop hit · sell at the next open" : ex === "sold" ? "Sold " + shortDay(p.exit.paperExitDate) + " · stop hit " + shortDay(p.exit.date) : nameOf(s, p.ticker) || (p.cushionPct == null ? "" : num(p.cushionPct, 1) + "% above stop");
+      return '<div class="pz-row has-score" data-pz-stock="' + esc(p.ticker) + '">' + avatar(p.ticker, p.light) + '<div><div class="nm">' + esc(p.ticker) + (ex ? tag(ex === "due" ? "SELL" : "SOLD") : "") + '</div><div class="nm2">' + esc(sub) + "</div></div>" +
         '<div class="r"><div class="px">$' + num(p.lastClose) + '</div><div class="ch">' + change(p.pnlPct) + "</div></div>" + scoreRing(sc ? sc.v : null) + "</div>";
     }).join("") : '<div class="pz-empty-row">None right now.</div>') + "</div>";
     h += '<div class="pz-meta"><span>S&amp;P 500 ' + (bk.spySinceStartPct == null ? "–" : (bk.spySinceStartPct >= 0 ? "+" : "−") + pct(bk.spySinceStartPct)) + (edge == null ? "" : " · you are " + (edge >= 0 ? "ahead" : "behind") + " by " + Math.abs(edge).toFixed(2) + " pts") +
-      "<br>Checked " + esc(shortDay(s.asOf)) + " " + esc(clock(s.generatedAt)) + (s.sessionComplete ? " · after the close" : "") + (fromCache ? " · saved copy" : "") + '</span><button type="button" data-pz="refresh">Refresh</button></div>';
+      "<br>Checked " + esc(shortDay(s.asOf)) + " " + esc(clock(s.generatedAt)) + (s.sessionComplete ? " · after the close" : "") + (fromCache ? " · saved copy" : "") + '</span><button type="button" data-pz="refresh">' + (inflight ? "Updating…" : "Refresh") + "</button></div>";
     h += '<p class="pz-foot">The ring beside each company is the agents’ score, 0–100' + (s.agentsAsOf ? " (last scored " + esc(shortDay(s.agentsAsOf)) + ")" : "") + ". Prices: Schwab. Decision support, not investment advice.</p>";
     HOME.innerHTML = h;
   }
@@ -410,8 +437,10 @@
     } else { chart = null; h += '<div class="pz-nochart">The chart arrives with the next check from your PC.</div>'; }
 
     /* the plan */
-    var plan = "";
-    if (pos && pos.exit && pos.exit.paperExitPrice == null) plan = "<p><b>Sell.</b> It closed at $" + num(pos.lastClose) + " on " + shortDay(pos.exit.date) + ", under your $" + num(pos.stop) + " stop. The plan is to sell all " + shares(pos.shares) + " shares at the next open.</p>";
+    var plan = "", ex = exitState(pos);
+    if (ex === "due") plan = "<p><b>Sell.</b> It closed at $" + num(pos.lastClose) + " on " + shortDay(pos.exit.date) + ", under your $" + num(pos.stop) + " stop. The plan is to sell all " + shares(pos.shares) + " shares at the next open.</p>";
+    else if (ex === "sold") plan = "<p><b>Sold on paper.</b> It closed under your $" + num(pos.stop) + " stop on " + shortDay(pos.exit.date) + "; the paper exit is " + shortDay(pos.exit.paperExitDate) + " at $" + num(pos.exit.paperExitPrice) + ", " + (pos.pnlPct == null ? "" : (pos.pnlPct >= 0 ? "up " : "down ") + pct(pos.pnlPct) + " on the trade") + ".</p>" +
+      '<p class="pz-fine">It still shows under holdings because the rules file on the PC (rules/book.json) lists it as open. Once it is moved to closed there, the next check tidies this up.</p>';
     else if (pos) plan = "<p><b>Hold.</b> The plan sells it if it closes under <b>$" + num(pos.stop) + "</b>. It is " + (pos.cushionPct == null ? "–" : num(Math.max(0, pos.cushionPct), 1) + "%") + " above that now.</p>" + meter((pos.cushionPct || 0) / 15, pos.light === "YELLOW" ? "var(--pz-warn)" : "var(--pz-up)") + '<div class="pz-ends"><span>Stop</span><span>15% clear</span></div>';
     else if (a.lot) plan = "<p><b>Sold</b> " + shortDay(a.lot.exitDate) + " at $" + num(a.lot.exitPrice) + ", " + (a.lot.pnlPct >= 0 ? "up " : "down ") + pct(a.lot.pnlPct) + " on the trade. Bought " + shortDay(a.lot.fillDate) + " at $" + num(a.lot.fill) + ".</p>";
     a.trg.forEach(function (t) {
@@ -631,18 +660,25 @@
     h += '<p class="pz-foot">Kraken spot. ' + (cs.mode === "LIVE" ? "Real money inside the caps in rules/crypto.json. " : "Validate mode: every order is checked by Kraken and not sent; fills are simulated. ") + "The scanner ranks what is moving, the committee judges it, the guard sizes it. Decision support, not investment advice.</p>";
     CRYPTO.innerHTML = h;
   }
-  function loadCrypto() {
-    var cached = null;
-    try { cached = JSON.parse(localStorage.getItem(CRYPTO_CACHE_KEY) || "null"); } catch (e) {}
-    if (cached) { lastCrypto = cached; renderCrypto(cached); }
+  var cryptoAt = 0, cryptoBusy = false;
+  function loadCrypto(force) {
+    var cached = lastCrypto;
+    if (!cached) {
+      try { cached = JSON.parse(localStorage.getItem(CRYPTO_CACHE_KEY) || "null"); } catch (e) {}
+      if (cached) { lastCrypto = cached; renderCrypto(cached); }
+    }
+    if (cryptoBusy || (!force && Date.now() - cryptoAt < 60e3)) return;
+    cryptoBusy = true;
     var list = cryptoSources(), i = 0;
     (function next(problem) {
-      if (i >= list.length) { if (!cached) renderCrypto(null, problem); return; }
+      if (i >= list.length) { cryptoBusy = false; cryptoAt = Date.now(); if (!cached) renderCrypto(null, problem); return; }
       var url = list[i++], api = url.indexOf("api.github.com") !== -1;
       fetch(url, { cache: "no-store", headers: api ? { Accept: "application/vnd.github.raw" } : {} })
         .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
         .then(function (cs) {
           if (!cs || !cs.generatedAt || !cs.mode) throw new Error("not a crypto status file");
+          cryptoBusy = false; cryptoAt = Date.now();
+          if (lastCrypto && lastCrypto.generatedAt === cs.generatedAt) return;
           try { localStorage.setItem(CRYPTO_CACHE_KEY, JSON.stringify(cs)); } catch (e) {}
           cached = cs; lastCrypto = cs; renderCrypto(cs);
         })
@@ -664,18 +700,26 @@
     renderHome(s, m, fromCache); renderNeeds(s, m); renderPicks(s, m); renderAgents(s, m);
     if (ui.stock) renderStock(s, m);
   }
-  function load() {
+  /* the saved copy paints at once; the live file is fetched behind it, at most once a minute unless asked,
+     and only redraws the screens when the check actually published something new */
+  var inflight = false, fetchedAt = 0;
+  function busy(on) { inflight = on; document.body.classList.toggle("pz-updating", on); var b = HOME.querySelector('[data-pz="refresh"]'); if (b) b.textContent = on ? "Updating…" : "Refresh"; }
+  function load(force) {
     var cached = null;
-    try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch (e) {}
-    if (cached) render(cached, true);
+    if (!last) { try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch (e) {} if (cached) render(cached, true); }
+    else cached = last;
+    if (inflight || (!force && last && Date.now() - fetchedAt < 60e3)) return;
+    busy(true);
     var list = sources(), i = 0;
     (function next(problem) {
-      if (i >= list.length) { if (!cached) render(null, false, problem); return; }
+      if (i >= list.length) { busy(false); if (!cached) render(null, false, problem); return; }
       var url = list[i++], api = url.indexOf("api.github.com") !== -1;
       fetch(url, { cache: "no-store", headers: api ? { Accept: "application/vnd.github.raw" } : {} })
         .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
         .then(function (s) {
           if (!s || !s.asOf || !s.positions) throw new Error("not a status file");
+          fetchedAt = Date.now(); busy(false);
+          if (last && !lastFromCache && last.generatedAt === s.generatedAt) return; /* nothing new: leave the screens alone */
           try { localStorage.setItem(CACHE_KEY, JSON.stringify(s)); } catch (e) {}
           cached = s; render(s, false);
         })
@@ -691,17 +735,21 @@
     else if (range) { ui.range = range.getAttribute("data-pz-range"); if (last) renderStock(last, model(last)); }
     else if (more) more.classList.toggle("open");
     else if (act && act.getAttribute("data-pz") === "back") closeStock(false);
-    else if (chip) { ui.chip = chip.getAttribute("data-pz-chip"); render(last, lastFromCache); }
-    else if (pick) { ui.pick = pick.getAttribute("data-pz-pick"); render(last, lastFromCache); }
+    else if (chip) { ui.chip = chip.getAttribute("data-pz-chip"); if (last) renderHome(last, model(last), lastFromCache); }
+    else if (pick) {
+      ui.pick = pick.getAttribute("data-pz-pick");
+      Array.prototype.forEach.call(PICKS.querySelectorAll("[data-pz-pick]"), function (b) { b.setAttribute("aria-pressed", String(b === pick)); });
+      if (last) $("pz-pick-rows").innerHTML = pickRows(last, model(last));
+    }
     else if (stock) openStock(stock.getAttribute("data-pz-stock"));
-    else if (act && act.getAttribute("data-pz") === "refresh") { load(); loadCrypto(); }
+    else if (act && act.getAttribute("data-pz") === "refresh") { load(true); loadCrypto(true); }
   });
   /* typing must not rebuild the input (the keyboard would close): only the rows are redrawn */
   document.addEventListener("input", function (e) {
     if (e.target && e.target.id === "pz-q") { ui.q = e.target.value; if (last) $("pz-pick-rows").innerHTML = pickRows(last, model(last)); }
   });
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) { load(); loadCrypto(); } });
-  window.altovixPulseReload = function () { load(); loadCrypto(); };
-  load();
-  loadCrypto();
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) { load(false); loadCrypto(); } });
+  window.altovixPulseReload = function () { load(true); loadCrypto(true); };
+  load(true);
+  loadCrypto(true);
 })();

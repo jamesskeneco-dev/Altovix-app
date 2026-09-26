@@ -7,9 +7,33 @@
   --pz-accent:#5468FF; --pz-accent-soft:rgba(84,104,255,.16);
   --pz-up:#3DDC84; --pz-down:#FF5C6C; --pz-warn:#FFB938;
   max-width:560px; margin:0 auto; padding:6px 4px 0; color:var(--pz-ink);
-  font-family:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  /* the phone's own font: nothing to download, no text swap, and it reads like the apps beside it */
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums;
 }
 body.pulse-on{background:#070812}
+body.pulse-on .brand{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif; font-weight:700; letter-spacing:.12em; font-size:17px}
+body.pulse-on .brand small{display:none}
+/* a screen coming on screen: a short fade so tab changes do not snap */
+.pz:not([hidden]):not(.pz-sheet){animation:pz-fade .18s ease-out}
+@keyframes pz-fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+/* a thin line under the status bar while the live file is being fetched */
+body.pz-updating::before{content:""; position:fixed; top:0; left:0; right:0; height:2px; z-index:401; pointer-events:none;
+  background:linear-gradient(90deg,transparent 0,#5468FF 40%,#8D9BFF 50%,#5468FF 60%,transparent 100%); background-size:200% 100%; animation:pz-prog 1.1s linear infinite}
+@keyframes pz-prog{from{background-position:200% 0} to{background-position:-200% 0}}
+/* touch feedback on the things that are tapped */
+.pz-chip, .pz-ranges button, .pz-back, .pz-meta button, .pz-empty button, .pz-legacy button{transition:transform .09s ease, background-color .12s ease, color .12s ease; -webkit-tap-highlight-color:transparent}
+.pz-chip:active, .pz-ranges button:active, .pz-back:active, .pz-meta button:active, .pz-empty button:active{transform:scale(.95)}
+.pz-row[data-pz-stock], .pz-need[data-pz-stock]{transition:background-color .12s ease}
+/* skeleton while the very first check is on its way (only seen before there is a saved copy) */
+.pz-skel .sk{display:block; border:none; border-radius:8px; background:linear-gradient(90deg,#11131F 0%,#1A1D2E 50%,#11131F 100%); background-size:200% 100%; animation:pz-shimmer 1.4s ease-in-out infinite; margin:6px 0}
+.pz-skel .w30{width:30%} .pz-skel .w40{width:40%} .pz-skel .w50{width:50%} .pz-skel .w60{width:60%} .pz-skel .r .sk{margin-left:auto} .pz-skel .w70{width:70%}
+.pz-skel .h12{height:12px} .pz-skel .h14{height:14px} .pz-skel .h16{height:16px} .pz-skel .h20{height:20px} .pz-skel .h44{height:44px}
+.pz-skel .ring{width:92px; height:92px; border-radius:50%; margin:0} .pz-skel .banner{height:78px; border-radius:20px; margin:18px 8px 0}
+.pz-skel .chip{width:92px; height:38px; border-radius:14px; margin:0} .pz-skel .av{width:52px; height:52px; border-radius:50%; margin:0} .pz-skel .sc{width:48px; height:48px; border-radius:50%; margin:0 0 0 auto}
+.pz-skel .pz-head>div{flex:1}
+@keyframes pz-shimmer{from{background-position:200% 0} to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){ .pz:not([hidden]){animation:none} .pz-skel .sk, body.pz-updating::before{animation:none} }
 body.pulse-on .masthead{background:#070812; border-bottom-color:transparent}
 body.pulse-on .masthead .strip, body.pulse-on .masthead .cmd, body.pulse-on .tape-date{display:none}
 body.pulse-on .brand{color:#fff}
@@ -17,6 +41,7 @@ body.pulse-on #foot{display:none}
 body.pulse-on .masthead, body.pulse-on .masthead-in, body.pulse-on .tape{border-color:transparent !important; box-shadow:none}
 body.pulse-on .brandbtns .themebtn{border:none !important; outline:none; background:#11131F; color:#B9BDD0; border-radius:50%; width:40px; height:40px; padding:0; display:inline-flex; align-items:center; justify-content:center}
 body.pulse-on .brandbtns .themebtn .lbl{display:none}
+body.pulse-on #themebtn{display:none} /* the phone screens are always dark */
 body.pulse-on .brandbtns{margin-left:auto; display:flex; gap:8px}
 @media (min-width:721px){ body.pulse-on .tabs{border-bottom:1px solid rgba(255,255,255,.07)} body.pulse-on .tab{color:#7C819A} body.pulse-on .tab[aria-selected="true"]{color:#fff; border-bottom-color:#5468FF} }
 
@@ -32,7 +57,7 @@ body.pulse-on .brandbtns{margin-left:auto; display:flex; gap:8px}
   .tab .dot{position:absolute; top:6px; right:14px; transform:none}
   .wrap{padding-bottom:120px}
   .tab.pz-legacy-tab{display:none}
-  .tab .pz-count{position:absolute; top:4px; left:calc(50% + 6px); min-width:17px; height:17px; padding:0 5px; box-sizing:border-box; border-radius:99px; background:#FF5C6C; color:#fff; font:700 10.5px/17px "Archivo",sans-serif; text-align:center}
+  .tab .pz-count{position:absolute; top:4px; left:calc(50% + 6px); min-width:17px; height:17px; padding:0 5px; box-sizing:border-box; border-radius:99px; background:#FF5C6C; color:#fff; font:700 10.5px/17px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; text-align:center}
   .pz-legacy:not([hidden]){display:flex; gap:8px; overflow-x:auto; padding:12px 8px 4px; scrollbar-width:none}
 }
 .tab .pz-count:empty{display:none}
@@ -177,9 +202,9 @@ body.pz-sheet-open{overflow:hidden}
 .pz-chart .lv{font-size:10.5px; font-weight:700; paint-order:stroke; stroke:var(--pz-ground); stroke-width:4px; stroke-linejoin:round}
 .pz-chart .xh{stroke:rgba(255,255,255,.5); stroke-width:1; stroke-dasharray:4 4; shape-rendering:crispEdges}
 .pz-chart .xt{fill:#363A4E}
-.pz-ranges{display:flex; gap:6px; padding:8px 8px 0; overflow-x:auto; scrollbar-width:none}
+.pz-ranges{display:flex; gap:4px; padding:8px 8px 0; overflow-x:auto; scrollbar-width:none}
 .pz-ranges::-webkit-scrollbar{display:none}
-.pz-ranges button{flex:0 1 auto; min-width:46px; background:none; border:none; color:var(--pz-mute); font:600 14px inherit; font-family:inherit; padding:9px 12px; border-radius:12px; cursor:pointer}
+.pz-ranges button{flex:0 0 auto; min-width:40px; white-space:nowrap; background:none; border:none; color:var(--pz-mute); font:600 13.5px inherit; font-family:inherit; padding:9px 9px; border-radius:12px; cursor:pointer}
 .pz-ranges button[aria-pressed="true"]{background:var(--pz-card-2); color:#fff}
 .pz-ranges button.kind{flex:none; min-width:0; width:42px; padding:8px 0; margin-left:auto; display:flex; align-items:center; justify-content:center; background:var(--pz-card); color:var(--pz-ink-2)}
 .pz-ranges button.kind svg{width:20px; height:20px}

@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "updated": "2026-09-17 (after the first Schwab check: JPM, BWXT, CDRE, RCAT closed; HII stop hit 09-17, exit due at the 09-18 open)",
+  "updated": "2026-09-26 (HII moved to closed: stop hit 09-17, paper exit at the 09-18 open 277.13; cash 7858.51 -> 8149.08)",
   "source": "claude/altovix-state.md (Claude project) - when the plan changes, this file changes",
   "cycle": {
     "name": "Cycle one",
     "start": "2026-09-04",
     "end": "2026-10-03",
     "notional": 10000,
-    "cash": 7858.51,
+    "cash": 8149.08,
     "paper": true
   },
   "nearStopPct": 3,
@@ -35,14 +35,6 @@
       "fillDate": "2026-09-04",
       "stop": 480.0,
       "sleeve": "bluechip"
-    },
-    {
-      "ticker": "HII",
-      "shares": 1.0485,
-      "fill": 286.13,
-      "fillDate": "2026-09-04",
-      "stop": 278.0,
-      "sleeve": "defense"
     },
     {
       "ticker": "RGR",
@@ -125,6 +117,16 @@
       "exitDate": "2026-09-17",
       "exitPrice": 7.395,
       "reason": "Stop: closed 7.10 < 7.35."
+    },
+    {
+      "ticker": "HII",
+      "shares": 1.0485,
+      "fill": 286.13,
+      "fillDate": "2026-09-04",
+      "signalDate": "2026-09-17",
+      "exitDate": "2026-09-18",
+      "exitPrice": 277.13,
+      "reason": "Stop: closed 277.14 < 278.00."
     }
   ],
   "triggers": [
